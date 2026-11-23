@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #fcfcfd;
+  --foreground: #101828;
+  --card: #ffffff;
+  --card-hover: #f8f9fa;
+  --border: #e4e7ec;
+  --accent: #7f56d9;
+  --accent-hover: #6941c6;
+  --success: #12b76a;
+  --warning: #f79009;
+  --error: #f04438;
+}
+
+.dark {
+  --background: #09090b;
+  --foreground: #f4f4f5;
+  --card: #121215;
+  --card-hover: #18181c;
+  --border: #27272a;
+  --accent: #9e77ed;
+  --accent-hover: #7f56d9;
+  --success: #12b76a;
+  --warning: #f79009;
+  --error: #f04438;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+@layer utilities {
+  .gradient-text {
+    @apply bg-gradient-to-r from-brand-600 via-indigo-600 to-purple-600 dark:from-purple-400 dark:via-violet-400 dark:to-indigo-400 bg-clip-text text-transparent;
+  }
+}
+
+/* Custom Dual-handle range slider */
+.dual-range input[type="range"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  margin: 0;
+  background: transparent;
+  pointer-events: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.dual-range input[type="range"]::-webkit-slider-runnable-track {
+  background: transparent;
+  height: 28px;
+}
+.dual-range input[type="range"]::-moz-range-track {
+  background: transparent;
+}
+.dual-range input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: auto;
+  width: 20px;
+  height: 20px;
+  margin-top: 4px;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 3px solid #7f56d9;
+  cursor: grab;
+  box-shadow: 0 2px 6px rgba(16, 24, 40, 0.15), 0 0 0 4px rgba(127, 86, 217, 0.15);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.dual-range input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.25), 0 0 0 6px rgba(127, 86, 217, 0.25);
+}
+.dual-range input[type="range"]::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.15);
+}
+.dual-range input[type="range"]::-moz-range-thumb {
+  pointer-events: auto;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 3px solid #7f56d9;
+  cursor: grab;
+  box-shadow: 0 2px 6px rgba(16, 24, 40, 0.15);
+}
+.dual-range input[type="range"]:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid #7f56d9;
+  outline-offset: 3px;
+}

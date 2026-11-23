@@ -1,0 +1,97 @@
+import type { Config } from "tailwindcss";
+
+const config: Config = {
+  darkMode: "class",
+  content: [
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        brand: {
+          25: "#fcfaff",
+          50: "#f9f5ff",
+          100: "#f4ebff",
+          200: "#e9d7fe",
+          300: "#d6bbfb",
+          400: "#b692f6",
+          500: "#9e77ed",
+          600: "#7f56d9",
+          700: "#6941c6",
+          800: "#53389e",
+          900: "#42307d",
+          950: "#2c1c5f",
+        },
+        primary: {
+          25: "#f5f8ff",
+          50: "#eff4ff",
+          100: "#d1e0ff",
+          200: "#b2ccff",
+          300: "#84adff",
+          400: "#528bff",
+          500: "#2970ff",
+          600: "#155eef",
+          700: "#004eeb",
+          800: "#0040c1",
+          900: "#00359e",
+        },
+        gray: {
+          25: "#fafafa",
+          50: "#f4f4f5",
+          100: "#e4e4e7",
+          200: "#d4d4d8",
+          300: "#a1a1aa",
+          400: "#71717a",
+          500: "#52525b",
+          600: "#3f3f46",
+          700: "#27272a",
+          800: "#18181b",
+          900: "#09090b",
+          950: "#040406",
+        },
+        success: {
+          50: "#ecfdf3",
+          100: "#dcfae6",
+          500: "#12b76a",
+          600: "#039855",
+          700: "#027a48",
+        },
+        warning: {
+          50: "#fffaeb",
+          100: "#fef0c7",
+          500: "#f79009",
+          600: "#dc6803",
+          700: "#b54708",
+        },
+        error: {
+          50: "#fef3f2",
+          100: "#fee4e2",
+          500: "#f04438",
+          600: "#d92d20",
+          700: "#b42318",
+        },
+      },
+      boxShadow: {
+        xs: "0 1px 2px 0 rgba(16, 24, 40, 0.05)",
+        sm: "0 1px 3px 0 rgba(16, 24, 40, 0.1), 0 1px 2px 0 rgba(16, 24, 40, 0.06)",
+        md: "0 4px 8px -2px rgba(16, 24, 40, 0.1), 0 2px 4px -2px rgba(16, 24, 40, 0.06)",
+        lg: "0 12px 16px -4px rgba(16, 24, 40, 0.08), 0 4px 6px -2px rgba(16, 24, 40, 0.03)",
+        xl: "0 20px 24px -4px rgba(16, 24, 40, 0.08), 0 8px 8px -4px rgba(16, 24, 40, 0.03)",
+        "2xl": "0 24px 48px -12px rgba(16, 24, 40, 0.18)",
+      },
+      fontFamily: {
+        sans: [
+          "Inter",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "Roboto",
+          "sans-serif",
+        ],
+      },
+    },
+  },
+  plugins: [],
+};
+export default config;
