@@ -1,0 +1,8 @@
+name = "clipscutora"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
+
+[vars]
+# Configure your Cloud GPU or Cloudflare Tunnel endpoint URL here:
+# BACKEND_URL = "https://your-cloud-gpu-endpoint.example.com"

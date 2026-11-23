@@ -11,7 +11,27 @@ export async function GET(req: NextRequest) {
   if (!source) {
     return NextResponse.json({ error: "Missing source" }, { status: 400 });
   }
-  // Fast path: the always-on backend answers without starting a new Python process
+  // Fast path / Remote backend: the backend answers directly
+  if (
+    BACKEND_URL &&
+    !BACKEND_URL.includes("localhost") &&
+    !BACKEND_URL.includes("127.0.0.1")
+  ) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/probe?source=${encodeURIComponent(source)}`, {
+        signal: AbortSignal.timeout(120_000),
+        cache: "no-store",
+      });
+      const data = await res.json();
+      return NextResponse.json(data, { status: data.error ? 422 : 200 });
+    } catch (e: any) {
+      return NextResponse.json(
+        { error: e?.message || "Failed to reach remote clipping backend" },
+        { status: 502 }
+      );
+    }
+  }
+
   if (await backendUp()) {
     try {
       const res = await fetch(`${BACKEND_URL}/probe?source=${encodeURIComponent(source)}`, {

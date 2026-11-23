@@ -25,6 +25,36 @@ export async function GET(req: NextRequest) {
   );
 
   if (!fs.existsSync(videoPath)) {
+    const backendUrl =
+      process.env.MODAL_API_URL ||
+      (process.env.BACKEND_URL &&
+      !process.env.BACKEND_URL.includes("localhost") &&
+      !process.env.BACKEND_URL.includes("127.0.0.1")
+        ? process.env.BACKEND_URL
+        : null);
+
+    if (backendUrl) {
+      try {
+        const remoteVideoUrl = `${backendUrl}/video?job_id=${encodeURIComponent(safeJobId)}&filename=${encodeURIComponent(safeFilename)}`;
+        const forwardHeaders = new Headers();
+        if (req.headers.get("range")) {
+          forwardHeaders.set("Range", req.headers.get("range")!);
+        }
+        const upstream = await fetch(remoteVideoUrl, { headers: forwardHeaders });
+        const resHeaders = new Headers();
+        resHeaders.set("Content-Type", upstream.headers.get("Content-Type") || "video/mp4");
+        if (upstream.headers.get("Content-Length")) {
+          resHeaders.set("Content-Length", upstream.headers.get("Content-Length")!);
+        }
+        if (upstream.headers.get("Content-Range")) {
+          resHeaders.set("Content-Range", upstream.headers.get("Content-Range")!);
+        }
+        resHeaders.set("Accept-Ranges", "bytes");
+        return new NextResponse(upstream.body, { status: upstream.status, headers: resHeaders });
+      } catch {
+        return new NextResponse("Remote video unavailable", { status: 502 });
+      }
+    }
     return new NextResponse("Video not found", { status: 404 });
   }
 

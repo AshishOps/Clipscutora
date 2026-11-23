@@ -77,8 +77,14 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // 3. If Modal backend URL is available and job not finished, proxy status from Modal
-  const backendUrl = process.env.MODAL_API_URL;
+  // 3. If remote backend URL (Modal, Cloud GPU or Cloudflare Tunnel) is available, proxy status
+  const backendUrl =
+    process.env.MODAL_API_URL ||
+    (process.env.BACKEND_URL &&
+    !process.env.BACKEND_URL.includes("localhost") &&
+    !process.env.BACKEND_URL.includes("127.0.0.1")
+      ? process.env.BACKEND_URL
+      : null);
   if (backendUrl && (!job || job.status === "processing" || job.status === "queued")) {
     try {
       const res = await fetch(`${backendUrl}/get_status?job_id=${encodeURIComponent(jobId)}`);
