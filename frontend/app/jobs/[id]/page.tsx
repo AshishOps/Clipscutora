@@ -6,7 +6,6 @@ import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Download01,
-  Share01,
   CheckCircle,
   AlertCircle,
   Stars01,
@@ -14,8 +13,8 @@ import {
   Check,
   Film01,
   Lightning01,
+  Loading01,
 } from "@untitledui/icons";
-import { Loader2 } from "lucide-react";
 import { getJobStatus, ClipResult } from "@/lib/api";
 import { formatDuration } from "@/lib/utils";
 import {
@@ -28,14 +27,14 @@ import {
 const PIPELINE_STEPS = [
   { id: "download", label: "1. Download & Audio", threshold: 15 },
   { id: "transcribe", label: "2. Speech Recognition", threshold: 35 },
-  { id: "virality", label: "3. Engagement & Virality", threshold: 70 },
+  { id: "virality", label: "3. Virality & Hook Scoring", threshold: 70 },
   { id: "render", label: "4. 9:16 Crop & Subtitles", threshold: 85 },
 ];
 
 export default function JobStatusPage() {
   const params = useParams();
   const router = useRouter();
-  const jobId = params.id as string;
+  const jobId = (params?.id as string) || "";
   const [copied, setCopied] = useState(false);
 
   const handleCopyLink = () => {
@@ -49,6 +48,7 @@ export default function JobStatusPage() {
   const { data: job, isLoading, error } = useQuery({
     queryKey: ["jobStatus", jobId],
     queryFn: () => getJobStatus(jobId),
+    enabled: !!jobId,
     refetchInterval: (query) => {
       const status = query.state.data?.status;
       if (status === "completed" || status === "failed") {
@@ -61,25 +61,29 @@ export default function JobStatusPage() {
   if (isLoading && !job) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
-        <div className="w-14 h-14 rounded-2xl bg-zinc-900 border border-zinc-800 ring-8 ring-zinc-900/40 flex items-center justify-center shadow-xs">
-          <Loader2 className="w-6 h-6 text-brand-400 animate-spin" />
+        <div className="w-14 h-14 rounded-2xl bg-white border border-gray-200 ring-8 ring-gray-100 dark:bg-zinc-900 dark:border-zinc-800 dark:ring-zinc-900/40 flex items-center justify-center shadow-xs">
+          <Loading01 className="w-6 h-6 text-brand-600 dark:text-brand-400 animate-spin stroke-[2]" />
         </div>
-        <p className="text-sm font-medium text-zinc-400">Loading job status...</p>
+        <p className="text-sm font-semibold text-gray-700 dark:text-zinc-300">
+          Loading clipping job status...
+        </p>
       </div>
     );
   }
 
   if (error || job?.status === "failed") {
     return (
-      <div className="max-w-md mx-auto">
+      <div className="max-w-md mx-auto pt-6">
         <Card className="p-8 text-center space-y-5">
-          <div className="w-14 h-14 rounded-2xl bg-rose-950/60 border border-rose-800/60 ring-8 ring-rose-950/30 mx-auto flex items-center justify-center text-rose-400 shadow-xs">
+          <div className="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-200 ring-8 ring-rose-50/60 dark:bg-rose-950/60 dark:border-rose-800/60 dark:ring-rose-950/30 mx-auto flex items-center justify-center text-rose-600 dark:text-rose-400 shadow-xs">
             <AlertCircle className="w-7 h-7 stroke-[2]" />
           </div>
           <div className="space-y-1.5">
-            <h2 className="text-lg font-bold text-zinc-100">Processing Failed</h2>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              {job?.error || (error as any)?.message || "An unexpected error occurred during processing."}
+            <h2 className="text-lg font-bold tracking-tight text-gray-900 dark:text-zinc-100">
+              Processing Pipeline Failed
+            </h2>
+            <p className="text-xs text-gray-500 dark:text-zinc-400 leading-relaxed">
+              {job?.error || (error as any)?.message || "An unexpected error occurred during clipping."}
             </p>
           </div>
           <Button
@@ -99,26 +103,26 @@ export default function JobStatusPage() {
   const clips = job?.clips || [];
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto">
+    <div className="space-y-8 max-w-5xl mx-auto pb-12">
       {/* Top Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-800/80 pb-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-200 dark:border-zinc-800/80 pb-6">
         <div className="space-y-2">
           <button
             onClick={() => router.push("/")}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5 stroke-[2]" /> New Clipping Job
           </button>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-zinc-100 flex items-center gap-2">
-              Job <span className="font-mono text-brand-400 text-xl font-normal">#{jobId}</span>
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-zinc-100 flex items-center gap-2">
+              Job <span className="font-mono text-brand-600 dark:text-brand-400 text-xl font-normal">#{jobId}</span>
             </h1>
             {isCompleted ? (
               <Badge variant="success" size="md" dot leftIcon={<CheckCircle className="w-3.5 h-3.5 stroke-[2]" />}>
-                Ready
+                Completed
               </Badge>
             ) : (
-              <Badge variant="warning" size="md" dot leftIcon={<Loader2 className="w-3.5 h-3.5 animate-spin" />}>
+              <Badge variant="warning" size="md" dot leftIcon={<Loading01 className="w-3.5 h-3.5 animate-spin stroke-[2]" />}>
                 Processing
               </Badge>
             )}
@@ -132,18 +136,18 @@ export default function JobStatusPage() {
             onClick={handleCopyLink}
             leftIcon={
               copied ? (
-                <Check className="w-3.5 h-3.5 text-emerald-400 stroke-[2.5]" />
+                <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 stroke-[2.5]" />
               ) : (
                 <Copy01 className="w-3.5 h-3.5 stroke-[2]" />
               )
             }
           >
-            {copied ? "Link Copied" : "Share Job"}
+            {copied ? "Link Copied" : "Share Job Link"}
           </Button>
 
           {isCompleted && clips.length > 0 && (
             <Badge variant="brand" size="md">
-              {clips.length} Clips Generated
+              {clips.length} {clips.length === 1 ? "Clip" : "Clips"} Ready
             </Badge>
           )}
         </div>
@@ -151,14 +155,14 @@ export default function JobStatusPage() {
 
       {/* Progress Card when running */}
       {!isCompleted && (
-        <Card className="p-6 sm:p-8 space-y-6 max-w-2xl mx-auto">
+        <Card className="p-6 sm:p-8 space-y-6 max-w-2xl mx-auto shadow-sm">
           <div className="space-y-1">
-            <h2 className="text-base font-bold text-zinc-100 flex items-center gap-2">
-              <Stars01 className="w-4 h-4 text-brand-400 stroke-[2]" />
+            <h2 className="text-base font-bold text-gray-900 dark:text-zinc-100 flex items-center gap-2">
+              <Stars01 className="w-4 h-4 text-brand-600 dark:text-brand-400 stroke-[2]" />
               Generating Viral Shorts Pipeline
             </h2>
-            <p className="text-xs text-zinc-400">
-              Extracting speech, scoring virality, detecting webcam positioning, and compiling 9:16 portrait video.
+            <p className="text-xs text-gray-500 dark:text-zinc-400 leading-relaxed">
+              Extracting speech, scoring virality, detecting speaker framing, and rendering dynamic 9:16 portrait video.
             </p>
           </div>
 
@@ -168,7 +172,7 @@ export default function JobStatusPage() {
             steps={PIPELINE_STEPS}
           />
 
-          <p className="text-[11px] text-zinc-500 text-center pt-2 border-t border-zinc-800/60">
+          <p className="text-[11px] text-gray-400 dark:text-zinc-500 text-center pt-2 border-t border-gray-100 dark:border-zinc-800/60">
             This page automatically updates in real-time. You can safely keep this tab open or return using the job link.
           </p>
         </Card>
@@ -177,6 +181,17 @@ export default function JobStatusPage() {
       {/* Completed Clips Grid */}
       {isCompleted && (
         <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold tracking-tight text-gray-900 dark:text-zinc-100">
+                Generated Viral Clips
+              </h2>
+              <p className="text-xs text-gray-500 dark:text-zinc-400">
+                Rendered with 9:16 portrait aspect ratio, styled animated captions, and optimized virality hooks.
+              </p>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {clips.map((clip) => {
               const scoreBadgeVariant =
@@ -185,10 +200,10 @@ export default function JobStatusPage() {
               return (
                 <Card
                   key={clip.id}
-                  className="overflow-hidden flex flex-col justify-between group hover:border-zinc-700/80 transition-all shadow-md"
+                  className="overflow-hidden flex flex-col justify-between group hover:border-gray-300 dark:hover:border-zinc-700/80 transition-all shadow-xs hover:shadow-md"
                 >
                   {/* 9:16 Video Player Container */}
-                  <div className="relative aspect-[9/16] bg-zinc-950 flex items-center justify-center border-b border-zinc-800/80">
+                  <div className="relative aspect-[9/16] bg-black flex items-center justify-center border-b border-gray-200 dark:border-zinc-800/80">
                     <video
                       src={clip.url || clip.path}
                       controls
@@ -206,14 +221,14 @@ export default function JobStatusPage() {
 
                     {/* Floating Duration & Layout Badges */}
                     <div className="absolute top-3 right-3 flex items-center gap-1.5 pointer-events-none">
-                      <span className="px-2 py-0.5 rounded-md bg-black/80 backdrop-blur-md text-[10px] font-medium text-zinc-200 border border-white/10 shadow-xs">
+                      <span className="px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[10px] font-medium text-white border border-white/10 shadow-xs">
                         {clip.layout === "split_cam"
                           ? "🎮 Split-Cam"
                           : clip.layout === "single_speaker"
                           ? "🎙️ Solo Speaker"
                           : "✨ 9:16 Fit"}
                       </span>
-                      <span className="px-2 py-0.5 rounded-md bg-black/80 backdrop-blur-md text-[11px] font-mono font-medium text-zinc-200 border border-white/10 shadow-xs">
+                      <span className="px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[11px] font-mono font-medium text-white border border-white/10 shadow-xs">
                         {formatDuration(clip.duration)}
                       </span>
                     </div>
@@ -222,10 +237,10 @@ export default function JobStatusPage() {
                   {/* Clip Details Card Content */}
                   <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
                     <div className="space-y-2">
-                      <h3 className="font-bold text-sm text-zinc-100 line-clamp-1 group-hover:text-brand-300 transition-colors">
+                      <h3 className="font-bold text-sm text-gray-900 dark:text-zinc-100 line-clamp-1 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
                         {clip.title}
                       </h3>
-                      <p className="text-xs italic text-zinc-400 line-clamp-2 leading-relaxed">
+                      <p className="text-xs italic text-gray-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
                         &ldquo;{clip.hook_line}&rdquo;
                       </p>
                     </div>
@@ -242,11 +257,11 @@ export default function JobStatusPage() {
                     )}
 
                     {/* Download Action Button */}
-                    <div className="pt-3 border-t border-zinc-800/70">
+                    <div className="pt-3 border-t border-gray-100 dark:border-zinc-800/70">
                       <a
                         href={clip.url || clip.path}
                         download={`${clip.filename || `clip_${clip.id}.mp4`}`}
-                        className="w-full"
+                        className="w-full block"
                       >
                         <Button
                           variant="primary"
