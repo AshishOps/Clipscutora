@@ -10,18 +10,27 @@ import {
   Download01,
   CheckCircle,
   AlertCircle,
+  Stars01,
   Copy01,
   Check,
+  Film01,
+  Lightning01,
   Loading01,
 } from "@untitledui/icons";
-import { getJobStatus } from "@/lib/api";
+import { getJobStatus, ClipResult } from "@/lib/api";
 import { formatDuration } from "@/lib/utils";
+import {
+  Button,
+  Badge,
+  Card,
+  ProgressBar,
+} from "@/components/untitledui";
 
 const PIPELINE_STEPS = [
-  { id: "download", label: "Download source and extract audio", threshold: 15 },
-  { id: "transcribe", label: "Speech recognition and word timing", threshold: 35 },
-  { id: "virality", label: "Score engagement and hooks", threshold: 70 },
-  { id: "render", label: "9:16 framing and burned captions", threshold: 85 },
+  { id: "download", label: "1. Download & Audio", threshold: 15 },
+  { id: "transcribe", label: "2. Speech Recognition", threshold: 35 },
+  { id: "virality", label: "3. Virality & Hook Scoring", threshold: 70 },
+  { id: "render", label: "4. 9:16 Crop & Subtitles", threshold: 85 },
 ];
 
 export default function JobStatusPage() {
@@ -53,187 +62,150 @@ export default function JobStatusPage() {
 
   if (isLoading && !job) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
-        <div className="w-12 h-12 border border-[var(--color-rule-2)] bg-[var(--color-paper-2)] flex items-center justify-center">
-          <Loading01 className="w-5 h-5 text-[var(--color-accent)] animate-spin stroke-[1.75]" />
+      <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
+        <div className="w-14 h-14 rounded-2xl bg-white border border-gray-200 ring-8 ring-gray-100 dark:bg-zinc-900 dark:border-zinc-800 dark:ring-zinc-900/40 flex items-center justify-center shadow-xs">
+          <Loading01 className="w-6 h-6 text-brand-600 dark:text-brand-400 animate-spin stroke-[2]" />
         </div>
-        <p className="text-sm text-[var(--color-muted)]">Loading job status…</p>
+        <p className="text-sm font-semibold text-gray-700 dark:text-zinc-300">
+          Loading clipping job status...
+        </p>
       </div>
     );
   }
 
   if (error || job?.status === "failed") {
     return (
-      <div className="max-w-md mx-auto pt-8">
-        <div className="hm-surface p-8 space-y-5">
-          <div className="w-10 h-10 border border-[var(--color-error)] bg-[var(--color-paper)] flex items-center justify-center text-[var(--color-error)]">
-            <AlertCircle className="w-5 h-5 stroke-[1.75]" />
+      <div className="max-w-md mx-auto pt-6">
+        <Card className="p-8 text-center space-y-5">
+          <div className="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-200 ring-8 ring-rose-50/60 dark:bg-rose-950/60 dark:border-rose-800/60 dark:ring-rose-950/30 mx-auto flex items-center justify-center text-rose-600 dark:text-rose-400 shadow-xs">
+            <AlertCircle className="w-7 h-7 stroke-[2]" />
           </div>
           <div className="space-y-1.5">
-            <h1 className="hm-display text-xl">Processing failed</h1>
-            <p className="text-sm text-[var(--color-muted)]">
+            <h2 className="text-lg font-bold tracking-tight text-gray-900 dark:text-zinc-100">
+              Processing Pipeline Failed
+            </h2>
+            <p className="text-xs text-gray-500 dark:text-zinc-400 leading-relaxed">
               {job?.error || (error as any)?.message || "An unexpected error occurred during clipping."}
             </p>
           </div>
-          <button
-            type="button"
+          <Button
+            variant="secondary-gray"
+            size="md"
             onClick={() => router.push("/")}
-            className="hm-btn-secondary px-4 inline-flex items-center gap-2 text-sm"
+            leftIcon={<ArrowLeft className="w-4 h-4 stroke-[2]" />}
           >
-            <ArrowLeft className="w-4 h-4 stroke-[1.75]" />
-            <span>Back to workspace</span>
-          </button>
-        </div>
+            Back to Workspace
+          </Button>
+        </Card>
       </div>
     );
   }
 
   const isCompleted = job?.status === "completed";
   const clips = job?.clips || [];
-  const progress = Math.min(100, Math.max(0, Math.round(job?.progress || 15)));
 
   return (
-    <div className="space-y-8">
-      {/* Top Job Header */}
-      <div className="flex flex-wrap items-end justify-between gap-4 pb-6 border-b border-[var(--color-rule)]">
+    <div className="space-y-8 max-w-5xl mx-auto pb-12">
+      {/* Top Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-200 dark:border-zinc-800/80 pb-6">
         <div className="space-y-2">
           <button
-            type="button"
             onClick={() => router.push("/")}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--color-muted)] hover:text-[var(--color-ink)] transition-colors duration-150 cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors cursor-pointer"
           >
-            <ArrowLeft className="w-3.5 h-3.5 stroke-[1.75]" />
-            <span>New clipping job</span>
+            <ArrowLeft className="w-3.5 h-3.5 stroke-[2]" /> New Clipping Job
           </button>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="hm-display text-2xl sm:text-3xl">
-              Job <span className="num text-[var(--color-accent)]">#{jobId}</span>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-zinc-100 flex items-center gap-2">
+              Job <span className="font-mono text-brand-600 dark:text-brand-400 text-xl font-normal">#{jobId}</span>
             </h1>
-            <span
-              role="status"
-              className={`px-2.5 py-1 text-xs font-medium border inline-flex items-center gap-1.5 ${
-                isCompleted
-                  ? "border-[var(--color-success)] text-[var(--color-success)]"
-                  : "border-[var(--color-warning)] text-[var(--color-warning)]"
-              }`}
-            >
-              {isCompleted ? (
-                <CheckCircle className="w-3.5 h-3.5 stroke-[1.75]" />
-              ) : (
-                <Loading01 className="w-3.5 h-3.5 animate-spin stroke-[1.75]" />
-              )}
-              <span>{isCompleted ? "Completed" : "Processing"}</span>
-            </span>
+            {isCompleted ? (
+              <Badge variant="success" size="md" dot leftIcon={<CheckCircle className="w-3.5 h-3.5 stroke-[2]" />}>
+                Completed
+              </Badge>
+            ) : (
+              <Badge variant="warning" size="md" dot leftIcon={<Loading01 className="w-3.5 h-3.5 animate-spin stroke-[2]" />}>
+                Processing
+              </Badge>
+            )}
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            type="button"
+          <Button
+            variant="secondary-gray"
+            size="sm"
             onClick={handleCopyLink}
-            className="hm-btn-secondary px-4 inline-flex items-center gap-2 text-xs"
+            leftIcon={
+              copied ? (
+                <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 stroke-[2.5]" />
+              ) : (
+                <Copy01 className="w-3.5 h-3.5 stroke-[2]" />
+              )
+            }
           >
-            {copied ? (
-              <Check className="w-3.5 h-3.5 text-[var(--color-success)] stroke-[2]" />
-            ) : (
-              <Copy01 className="w-3.5 h-3.5 stroke-[1.75]" />
-            )}
-            <span>{copied ? "Link copied" : "Share job link"}</span>
-          </button>
+            {copied ? "Link Copied" : "Share Job Link"}
+          </Button>
 
           {isCompleted && clips.length > 0 && (
-            <span className="px-3 h-10 inline-flex items-center border border-[var(--color-rule-2)] bg-[var(--color-paper-2)] text-xs font-medium text-[var(--color-ink)] num">
-              {clips.length} {clips.length === 1 ? "clip" : "clips"} ready
-            </span>
+            <Badge variant="brand" size="md">
+              {clips.length} {clips.length === 1 ? "Clip" : "Clips"} Ready
+            </Badge>
           )}
         </div>
       </div>
 
-      {/* Night Log & 2px Meter when running */}
+      {/* Progress Card when running */}
       {!isCompleted && (
-        <section className="hm-surface p-6 sm:p-8 max-w-2xl space-y-6">
-          <div className="flex items-baseline justify-between gap-4">
-            <div>
-              <h2 className="text-base font-medium text-[var(--color-ink)]">
-                {job?.stage || "Processing video pipeline…"}
-              </h2>
-              <p className="text-xs text-[var(--color-muted)] mt-1">
-                This page updates automatically until all 9:16 renders finish.
-              </p>
-            </div>
-            <span className="hm-display text-2xl num text-[var(--color-accent)]">{progress}%</span>
+        <Card className="p-6 sm:p-8 space-y-6 max-w-2xl mx-auto shadow-sm">
+          <div className="space-y-1">
+            <h2 className="text-base font-bold text-gray-900 dark:text-zinc-100 flex items-center gap-2">
+              <Stars01 className="w-4 h-4 text-brand-600 dark:text-brand-400 stroke-[2]" />
+              Generating Viral Shorts Pipeline
+            </h2>
+            <p className="text-xs text-gray-500 dark:text-zinc-400 leading-relaxed">
+              Extracting speech, scoring virality, detecting speaker framing, and rendering dynamic 9:16 portrait video.
+            </p>
           </div>
 
-          {/* Midnight 2px meter */}
-          <div className="h-[2px] w-full bg-[var(--color-rule-2)]">
-            <div
-              className="h-full bg-[var(--color-accent)] transition-opacity duration-300"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+          <ProgressBar
+            progress={job?.progress || 15}
+            stage={job?.stage || "Processing video pipeline..."}
+            steps={PIPELINE_STEPS}
+          />
 
-          <ol className="divide-y divide-[var(--color-rule)] border-t border-[var(--color-rule)]">
-            {PIPELINE_STEPS.map((s, index) => {
-              const isDone = progress >= s.threshold;
-              const prevThreshold = index > 0 ? PIPELINE_STEPS[index - 1].threshold : 0;
-              const isCurrent = progress < s.threshold && progress >= prevThreshold;
-
-              return (
-                <li
-                  key={s.id}
-                  className="py-3 flex items-center justify-between gap-4 text-sm"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs num text-[var(--color-muted)]">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <span className={isDone || isCurrent ? "text-[var(--color-ink)] font-medium" : "text-[var(--color-muted)]"}>
-                      {s.label}
-                    </span>
-                  </div>
-                  <span className="text-xs">
-                    {isDone ? (
-                      <span className="text-[var(--color-success)]">Done</span>
-                    ) : isCurrent ? (
-                      <span className="text-[var(--color-accent)]">Running</span>
-                    ) : (
-                      <span className="text-[var(--color-muted)]">Queued</span>
-                    )}
-                  </span>
-                </li>
-              );
-            })}
-          </ol>
-        </section>
+          <p className="text-[11px] text-gray-400 dark:text-zinc-500 text-center pt-2 border-t border-gray-100 dark:border-zinc-800/60">
+            This page automatically updates in real-time. You can safely keep this tab open or return using the job link.
+          </p>
+        </Card>
       )}
 
-      {/* Completed 9:16 Contact Sheet */}
+      {/* Completed Clips Grid */}
       {isCompleted && (
-        <section className="space-y-6">
-          <div className="flex flex-wrap items-baseline justify-between gap-4">
-            <h2 className="text-lg font-medium text-[var(--color-ink)]">Generated portrait clips</h2>
-            <p className="text-xs text-[var(--color-muted)]">
-              9:16 portrait renders with timed captions and virality score
-            </p>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold tracking-tight text-gray-900 dark:text-zinc-100">
+                Generated Viral Clips
+              </h2>
+              <p className="text-xs text-gray-500 dark:text-zinc-400">
+                Rendered with 9:16 portrait aspect ratio, styled animated captions, and optimized virality hooks.
+              </p>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {clips.map((clip) => {
-              const layoutLabel =
-                clip.layout === "split_cam"
-                  ? "Split-cam"
-                  : clip.layout === "single_speaker"
-                  ? "Solo speaker"
-                  : "9:16 fit";
+              const scoreBadgeVariant =
+                clip.score >= 80 ? "success" : clip.score >= 60 ? "amber" : "rose";
 
               return (
-                <article
+                <Card
                   key={clip.id}
-                  className="hm-surface flex flex-col justify-between"
+                  className="overflow-hidden flex flex-col justify-between group hover:border-gray-300 dark:hover:border-zinc-700/80 transition-all shadow-xs hover:shadow-md"
                 >
-                  {/* 9:16 Video Frame */}
-                  <div className="aspect-[9/16] bg-[var(--color-paper)] border-b border-[var(--color-rule)]">
+                  {/* 9:16 Video Player Container */}
+                  <div className="relative aspect-[9/16] bg-black flex items-center justify-center border-b border-gray-200 dark:border-zinc-800/80">
                     <video
                       src={clip.url || clip.path}
                       controls
@@ -241,58 +213,74 @@ export default function JobStatusPage() {
                       playsInline
                       preload="metadata"
                     />
-                  </div>
 
-                  {/* Clip Metadata & Actions */}
-                  <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
-                    <div className="space-y-2.5">
-                      <div className="flex items-center justify-between gap-2 text-xs">
-                        <span className="font-medium text-[var(--color-accent)] num">
-                          Score {clip.score}
-                        </span>
-                        <span className="text-[var(--color-muted)] num">
-                          {layoutLabel} / {formatDuration(clip.duration)}
-                        </span>
-                      </div>
-
-                      <h3 className="text-sm font-medium text-[var(--color-ink)] line-clamp-2">
-                        {clip.title}
-                      </h3>
-
-                      <p className="text-xs text-[var(--color-muted)] line-clamp-2">
-                        &ldquo;{clip.hook_line}&rdquo;
-                      </p>
-
-                      {clip.viral_factors && clip.viral_factors.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 pt-1">
-                          {clip.viral_factors.map((factor) => (
-                            <span
-                              key={factor}
-                              className="px-2 py-0.5 text-xs border border-[var(--color-rule)] bg-[var(--color-paper)] text-[var(--color-ink-2)]"
-                            >
-                              {factor}
-                            </span>
-                          ))}
-                        </div>
-                      )}
+                    {/* Floating Virality Score Badge */}
+                    <div className="absolute top-3 left-3 pointer-events-none">
+                      <Badge variant={scoreBadgeVariant} size="sm">
+                        ★ {clip.score} Viral Score
+                      </Badge>
                     </div>
 
-                    <div className="pt-3 border-t border-[var(--color-rule)]">
+                    {/* Floating Duration & Layout Badges */}
+                    <div className="absolute top-3 right-3 flex items-center gap-1.5 pointer-events-none">
+                      <span className="px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[10px] font-medium text-white border border-white/10 shadow-xs">
+                        {clip.layout === "split_cam"
+                          ? "🎮 Split-Cam"
+                          : clip.layout === "single_speaker"
+                          ? "🎙️ Solo Speaker"
+                          : "✨ 9:16 Fit"}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[11px] font-mono font-medium text-white border border-white/10 shadow-xs">
+                        {formatDuration(clip.duration)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Clip Details Card Content */}
+                  <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <h3 className="font-bold text-sm text-gray-900 dark:text-zinc-100 line-clamp-1 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
+                        {clip.title}
+                      </h3>
+                      <p className="text-xs italic text-gray-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                        &ldquo;{clip.hook_line}&rdquo;
+                      </p>
+                    </div>
+
+                    {/* Viral Factor Tags */}
+                    {clip.viral_factors && clip.viral_factors.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {clip.viral_factors.map((factor) => (
+                          <Badge key={factor} variant="gray" size="sm">
+                            #{factor}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Download Action Button */}
+                    <div className="pt-3 border-t border-gray-100 dark:border-zinc-800/70">
                       <a
                         href={clip.url || clip.path}
                         download={`${clip.filename || `clip_${clip.id}.mp4`}`}
-                        className="hm-btn-primary w-full px-4 text-sm inline-flex items-center justify-center gap-2"
+                        className="w-full block"
                       >
-                        <Download01 className="w-4 h-4 stroke-[1.75]" />
-                        <span>Download 9:16 video</span>
+                        <Button
+                          variant="primary"
+                          size="md"
+                          fullWidth
+                          leftIcon={<Download01 className="w-4 h-4 stroke-[2]" />}
+                        >
+                          Download 9:16 Video
+                        </Button>
                       </a>
                     </div>
                   </div>
-                </article>
+                </Card>
               );
             })}
           </div>
-        </section>
+        </div>
       )}
     </div>
   );

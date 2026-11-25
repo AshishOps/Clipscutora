@@ -2,38 +2,33 @@
 
 import React, { useEffect, useState } from "react";
 import { Sun, Moon01 } from "@untitledui/icons";
+import { cn } from "@/lib/utils";
 
-export const ThemeToggle: React.FC = () => {
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+export function ThemeToggle({ className }: { className?: string }) {
+  const [isDark, setIsDark] = useState(true);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const saved = localStorage.getItem("theme");
-    const isLight = saved === "light" || document.documentElement.dataset.mode === "light";
-    setTheme(isLight ? "light" : "dark");
+    const isDarkMode = document.documentElement.classList.contains("dark");
+    setIsDark(isDarkMode);
   }, []);
 
   const toggleTheme = () => {
-    const next = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    localStorage.setItem("theme", next);
-    document.documentElement.dataset.mode = next;
-    if (next === "dark") {
+    const nextDark = !isDark;
+    setIsDark(nextDark);
+    if (nextDark) {
       document.documentElement.classList.add("dark");
-      document.documentElement.classList.remove("light");
+      localStorage.setItem("theme", "dark");
     } else {
       document.documentElement.classList.remove("dark");
-      document.documentElement.classList.add("light");
+      localStorage.setItem("theme", "light");
     }
   };
 
   if (!mounted) {
     return (
-      <div
-        className="w-10 h-10 border border-[var(--color-rule)] bg-[var(--color-paper-2)]"
-        aria-hidden="true"
-      />
+      <div className="w-9 h-9 rounded-xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60" />
     );
   }
 
@@ -41,15 +36,21 @@ export const ThemeToggle: React.FC = () => {
     <button
       type="button"
       onClick={toggleTheme}
-      aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-      title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-      className="w-10 h-10 inline-flex items-center justify-center border border-[var(--color-rule-2)] bg-transparent text-[var(--color-ink)] hover:bg-[var(--color-paper-2)] transition-colors duration-150 cursor-pointer"
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      className={cn(
+        "relative w-9 h-9 rounded-xl border flex items-center justify-center transition-all duration-200 cursor-pointer outline-none select-none shadow-xs",
+        "border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-900",
+        "dark:border-zinc-800 dark:hover:border-zinc-700 dark:bg-zinc-900/60 dark:hover:bg-zinc-800 dark:text-zinc-300 dark:hover:text-zinc-100",
+        "focus:ring-4 focus:ring-brand-500/15",
+        className
+      )}
     >
-      {theme === "dark" ? (
-        <Sun className="w-4 h-4 stroke-[1.75]" />
+      {isDark ? (
+        <Sun className="w-4 h-4 stroke-[2] transition-transform rotate-0 scale-100 text-amber-400" />
       ) : (
-        <Moon01 className="w-4 h-4 stroke-[1.75]" />
+        <Moon01 className="w-4 h-4 stroke-[2] transition-transform rotate-0 scale-100 text-brand-600" />
       )}
     </button>
   );
-};
+}
