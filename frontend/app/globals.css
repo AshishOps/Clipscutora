@@ -320,6 +320,7 @@ html:not(.dark) .lg-space {
 }
 
 .anim-cap-pop { animation: cap-pop 2.1s ease-out infinite; }
+.anim-cap-word-by-word { animation: cap-pop 0.65s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
 .anim-cap-bounce-drop { animation: cap-bounce-drop 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
 .anim-cap-soft-rise { animation: cap-soft-rise 2.4s ease-out infinite; }
 .anim-cap-blur-in { animation: cap-blur-in 2.4s ease-out infinite; }

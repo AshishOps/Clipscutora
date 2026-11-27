@@ -11,6 +11,7 @@ export interface SubmitJobRequest {
   font?: string;
   caption_animation?: string;
   caption_glow?: string;
+  caption_words?: string;
   title_overlay?: boolean;
   hindi_quality?: "fast" | "best";
 }

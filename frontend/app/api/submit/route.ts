@@ -18,6 +18,7 @@ const VALID_ANIMATIONS = new Set([
 ]);
 
 const VALID_GLOWS = new Set(["auto", "off", "subtle", "medium", "intense"]);
+const VALID_WORD_MODES = new Set(["auto", "word", "short", "sentence"]);
 
 export async function POST(req: NextRequest) {
   try {
@@ -35,6 +36,7 @@ export async function POST(req: NextRequest) {
       font,
       caption_animation,
       caption_glow,
+      caption_words,
       title_overlay,
       hindi_quality,
     } = body;
@@ -55,6 +57,9 @@ export async function POST(req: NextRequest) {
     const captionGlow = VALID_GLOWS.has(String(caption_glow || ""))
       ? String(caption_glow)
       : "auto";
+    const captionWords = VALID_WORD_MODES.has(String(caption_words || ""))
+      ? String(caption_words)
+      : "auto";
 
     if (!source) {
       return NextResponse.json({ error: "Missing source video URL or path" }, { status: 400 });
@@ -74,6 +79,7 @@ export async function POST(req: NextRequest) {
       caption_font: fontName || null,
       caption_animation: captionAnimation,
       caption_glow: captionGlow,
+      caption_words: captionWords,
       title_overlay: title_overlay !== false,
       hindi_quality: hindi_quality === "best" ? "best" : "fast",
       captions: captions !== false,

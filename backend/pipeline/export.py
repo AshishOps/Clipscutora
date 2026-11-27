@@ -44,6 +44,7 @@ async def export_all_clips(
     layout_info: Optional[Dict[str, Any]] = None,
     caption_animation: str = "auto",
     caption_glow: str = "auto",
+    caption_words: str = "auto",
 ) -> List[Dict[str, Any]]:
     """
     Optimized OpenShorts export pipeline:
@@ -112,6 +113,7 @@ async def export_all_clips(
                     font=caption_font,
                     animation=caption_animation,
                     glow=caption_glow,
+                    word_mode=caption_words,
                 )
                 subtitle_file = sub_target
 

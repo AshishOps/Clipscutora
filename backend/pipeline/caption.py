@@ -339,6 +339,8 @@ VALID_ANIMATIONS = {
     "word-wave", "blur-in", "soft-rise", "drift-right", "focus-settle", "flicker-in",
 }
 
+VALID_WORD_MODES = {"auto", "word", "short", "sentence"}
+
 GLOW_MULTIPLIERS = {
     "auto": 1.0,
     "off": 0.0,
@@ -420,6 +422,7 @@ async def generate_captions(
     font: Optional[str] = None,
     animation: Optional[str] = None,
     glow: Optional[str] = None,
+    word_mode: Optional[str] = None,
 ) -> Path:
     """Write an ASS subtitle file with animated word captions and optional multi-layer glow."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -435,6 +438,10 @@ async def generate_captions(
     anim_mode = (animation or "auto").lower()
     if anim_mode == "auto" or anim_mode not in VALID_ANIMATIONS:
         anim_mode = st.get("anim", "pop")
+
+    w_mode = (word_mode or "auto").lower()
+    if w_mode not in VALID_WORD_MODES:
+        w_mode = "auto"
 
     glow_mode = (glow or "auto").lower()
     glow_mult = GLOW_MULTIPLIERS.get(glow_mode, 1.0)
@@ -458,10 +465,15 @@ async def generate_captions(
                 )
     clean_words = _merge_continuation_words(raw_clip_words)
 
-    # 2. Geometry
+    # 2. Geometry — 1px crisp hairline border on stroked presets (leave BorderStyle=3 box padding intact)
     scale = config.CAPTION_SIZE_SCALE
     size = int(round(st["size"] * scale))
-    border = round(st["border"] * (scale if st.get("border_style", 1) == 1 else 1), 1)
+    if st.get("border_style", 1) == 1:
+        border = round(1.3 * scale, 1) if st.get("border", 0) > 0 else 0.0
+        shadow_depth = min(int(st.get("shadow", 2)), 2)
+    else:
+        border = st.get("border", 14)
+        shadow_depth = st.get("shadow", 0)
     split = layout_type == "split_cam"
     cy = int(H * (config.CAPTION_Y_SPLIT if split else config.CAPTION_Y_DEFAULT))
     avail_w = W - 120
@@ -471,8 +483,28 @@ async def generate_captions(
         chars = sum(len(x) for x in words) + max(0, len(words) - 1)
         return chars * fs * st["char_w"] * max(pop, 100) / 100.0
 
-    max_chars = max(6, int(avail_w / (size * st["char_w"] * max(pop, 100) / 100.0)))
-    max_words = 1 if st["mode"] == "single" else st.get("max_words", 3)
+    effective_mode = st["mode"]
+    if w_mode == "word":
+        max_words = 1
+        max_chars = 32
+        max_block_dur = 1.2
+    elif w_mode == "short":
+        if effective_mode == "single":
+            effective_mode = "highlight"
+        max_words = 3
+        max_chars = max(16, int(avail_w / (size * st["char_w"] * 0.85)))
+        max_block_dur = 1.6
+    elif w_mode == "sentence":
+        if effective_mode == "single":
+            effective_mode = "highlight"
+        max_words = 5
+        # Allow 4-5 words to stay grouped cleanly in one sentence (wraps cleanly onto 2 lines if wide)
+        max_chars = max(36, int(avail_w / (size * st["char_w"] * 0.55)))
+        max_block_dur = 2.8
+    else:
+        max_words = 1 if effective_mode == "single" else st.get("max_words", 3)
+        max_chars = max(10 if max_words <= 3 else 22, int(avail_w / (size * st["char_w"] * max(pop, 100) / 100.0)))
+        max_block_dur = 1.3 if max_words <= 3 else 2.2
 
     def fmt(word: str) -> str:
         t = _escape_ass_text(word)
@@ -482,7 +514,7 @@ async def generate_captions(
             return t.lower()
         return t
 
-    if st["mode"] == "karaoke":
+    if effective_mode == "karaoke":
         primary, secondary = st["active"], st["text"]
     else:
         primary, secondary = st["text"], st.get("active", st["text"])
@@ -497,7 +529,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,{st['font']},{size},{primary},{secondary},{st['outline']},{st['back']},1,0,0,0,100,100,0,0,{st.get('border_style', 1)},{border},{st['shadow']},5,60,60,0,1
+Style: Default,{st['font']},{size},{primary},{secondary},{st['outline']},{st['back']},1,0,0,0,100,100,0,0,{st.get('border_style', 1)},{border},{shadow_depth},5,60,60,0,1
 Style: Title,Arial Black,{title_size},{WHITE},{WHITE},{_rgb('000000', 0x10)},{_rgb('000000', 0x10)},1,0,0,0,100,100,0,0,3,14,0,2,90,90,0,1
 
 [Events]
@@ -511,6 +543,8 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             return "&HFFFFFF&"
         return f"&H{h[4:6]}{h[2:4]}{h[0:2]}&"
 
+    halo_base = max(border, 2.8 * scale)
+
     def emit_with_glow(ev_s: float, ev_e: float, lead_tags: str, body_text: str, glow_override: Optional[str] = None) -> None:
         """Emit legacy single-string event cleanly (e.g. karaoke)."""
         ts_s, ts_e = _ass_time(ev_s), _ass_time(ev_e)
@@ -521,8 +555,8 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             g_blur = max(5.0, glow_cfg["blur"] * scale * (0.72 + 0.32 * glow_mult))
             inner_alpha = max(25, min(175, int(205 - (g_strength / 100.0) * 165)))
             outer_alpha = max(80, min(215, int(225 - (g_strength / 100.0) * 125)))
-            i_bord = round(border + 3.2 * scale * (0.8 + 0.2 * glow_mult), 1)
-            o_bord = round(border + 7.5 * scale * (0.8 + 0.2 * glow_mult), 1)
+            i_bord = round(halo_base + 3.2 * scale * (0.8 + 0.2 * glow_mult), 1)
+            o_bord = round(halo_base + 7.5 * scale * (0.8 + 0.2 * glow_mult), 1)
             i_tags = f"\\1a&HFF&\\3a&H{inner_alpha:02X}&\\4a&HFF&\\3c{g_bgr}\\bord{i_bord}\\blur{round(g_blur * 0.72, 1)}\\shad0"
             o_tags = f"\\1a&HFF&\\3a&H{outer_alpha:02X}&\\4a&HFF&\\3c{g_bgr}\\bord{o_bord}\\blur{round(g_blur * 1.45, 1)}\\shad0"
             clean_o = re.sub(r"\\rDefault[^}]*", lambda m: m.group(0) + o_tags, body_text)
@@ -570,8 +604,8 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             g_blur = max(5.0, glow_cfg["blur"] * scale * (0.72 + 0.32 * glow_mult))
             inner_alpha = max(25, min(175, int(205 - (g_strength / 100.0) * 165)))
             outer_alpha = max(80, min(215, int(225 - (g_strength / 100.0) * 125)))
-            i_bord = round(border + 3.2 * scale * (0.8 + 0.2 * glow_mult), 1)
-            o_bord = round(border + 7.5 * scale * (0.8 + 0.2 * glow_mult), 1)
+            i_bord = round(halo_base + 3.2 * scale * (0.8 + 0.2 * glow_mult), 1)
+            o_bord = round(halo_base + 7.5 * scale * (0.8 + 0.2 * glow_mult), 1)
             i_blur = round(g_blur * 0.72, 1)
             o_blur = round(g_blur * 1.45, 1)
 
@@ -610,22 +644,47 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         )
 
     # 4. Word captions
-    blocks = _collect_word_blocks(clean_words, max_chars=max_chars, max_duration=1.3)
-    split_blocks: List[List[WordTimestamp]] = []
-    for b in blocks:
-        for k in range(0, len(b), max_words):
-            split_blocks.append(b[k:k + max_words])
-    blocks = [b for b in split_blocks if b]
+    if w_mode == "word":
+        blocks = [[w] for w in clean_words]
+    else:
+        blocks = _collect_word_blocks(clean_words, max_chars=max_chars, max_duration=max_block_dur)
+        split_blocks: List[List[WordTimestamp]] = []
+        for b in blocks:
+            for k in range(0, len(b), max_words):
+                split_blocks.append(b[k:k + max_words])
+        blocks = [b for b in split_blocks if b]
 
     base_blur = f"\\blur{st['blur']}" if st.get("blur") else ""
     palette = st.get("palette") or []
     word_counter = 0
 
+    def _active_word_anim() -> str:
+        if anim_mode == "word-by-word":
+            target = max(108, pop)
+            return f"\\fscx88\\fscy88\\t(0,85,\\fscx{target}\\fscy{target})\\t(85,155,\\fscx100\\fscy100)"
+        if anim_mode == "pop" and pop != 100:
+            return (
+                f"\\fscx92\\fscy92\\t(0,100,\\fscx{pop}\\fscy{pop})"
+                f"\\t(100,180,\\fscx{100 + (pop - 100) // 2}\\fscy{100 + (pop - 100) // 2})"
+            )
+        return ""
+
     for b_idx, block in enumerate(blocks):
         texts = [fmt(w.word) for w in block]
+        if effective_mode == "two_line" and len(block) >= 2:
+            wrap_mid = max(1, len(block) // 2)
+        elif effective_mode in ("highlight", "chunk", "karaoke") and len(block) >= 4 and est_width(texts, size) > avail_w:
+            wrap_mid = (len(block) + 1) // 2
+        else:
+            wrap_mid = 0
+        line_w = (
+            max(est_width(texts[:wrap_mid], size), est_width(texts[wrap_mid:], size))
+            if wrap_mid
+            else est_width(texts, size)
+        )
         fs = size
-        if est_width(texts, size) > avail_w:
-            fs = max(int(size * 0.55), int(size * avail_w / est_width(texts, size)))
+        if line_w > avail_w:
+            fs = max(int(size * 0.55), int(size * avail_w / line_w))
         line_tags = (f"\\fs{fs}" if fs != size else "") + base_blur
         reset = "{\\rDefault" + line_tags + "}"
         next_start = blocks[b_idx + 1][0].start if b_idx + 1 < len(blocks) else clip_dur
@@ -636,7 +695,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             start = block[0].start if i == 0 else block[i].start
             return e if e > start else round(start + 0.12, 2)
 
-        if st["mode"] == "karaoke":
+        if effective_mode == "karaoke":
             parts = []
             for i, w in enumerate(block):
                 nxt = block[i + 1].start if i < len(block) - 1 else w.end
@@ -645,11 +704,12 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 parts.append(f"{{\\kf{dur_cs}{fn}}}{texts[i]}" + (reset if fn else ""))
             ev_s, ev_e = block[0].start, max(block[0].start + 0.2, min(block[-1].end + 0.3, next_start))
             ent = _build_entrance_tags(anim_mode, W // 2, cy, pop, True) + line_tags
-            emit_with_glow(ev_s, ev_e, ent, " ".join(parts))
+            karaoke_body = (" ".join(parts[:wrap_mid]) + "\\N" + " ".join(parts[wrap_mid:])) if wrap_mid else " ".join(parts)
+            emit_with_glow(ev_s, ev_e, ent, karaoke_body)
             continue
 
         # Two-line stacked mode (Bouncy Trendy, Devin Jatho, Attention, Afterglow, Tech Bro)
-        if st["mode"] == "two_line":
+        if effective_mode == "two_line":
             r1_font = st.get("row1_font")
             r1_italic = "\\i1" if st.get("row1_italic") else ("\\i0" if st.get("row2_italic") else "")
             r1_scale = int(fs * (st.get("row1_scale", 85) / 100.0))
@@ -663,7 +723,6 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             r2_italic = "\\i1" if st.get("row2_italic") else ""
             r2_scale = int(fs * (st.get("row2_scale", 108) / 100.0))
             r2_base_color = st.get("row2_color", st.get("active", st["text"]))
-            r2_base_hex = _ass_to_hex(r2_base_color)
 
             split_at = max(1, len(block) // 2) if len(block) >= 2 else 0
             row1_indices = range(0, split_at)
@@ -689,12 +748,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                     elif not fn and is_row2:
                         fn = f"\\fn{r2_font}\\fs{r2_scale}{r2_italic}"
 
-                    anim = ""
-                    if j == i and anim_mode == "pop" and pop != 100:
-                        anim = (
-                            f"\\fscx92\\fscy92\\t(0,100,\\fscx{pop}\\fscy{pop})"
-                            f"\\t(100,180,\\fscx{100 + (pop - 100) // 2}\\fscy{100 + (pop - 100) // 2})"
-                        )
+                    anim = _active_word_anim() if j == i else ""
 
                     if not is_row2:
                         # Row 1 keeps its own paired color (e.g. white on Devin Jatho / Bouncy Trendy) & matching glow
@@ -719,7 +773,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             continue
 
         # Splash Hero composition (Business, Trading Bro, Aura Glow): big hero active word + small white supports
-        if st["mode"] == "splash_hero":
+        if effective_mode == "splash_hero":
             hero_font = st.get("hero_font", st["font"])
             hero_fs = int(fs * st.get("hero_scale", 1.5))
             support_fs = max(18, int(fs * 0.72))
@@ -728,35 +782,43 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 ev_e = word_end(i)
                 ent = _build_entrance_tags(anim_mode, W // 2, cy, pop, i == 0) + line_tags
                 rows_out = []
-                for j, _w in enumerate(block):
-                    txt = _escape_ass_text(_w.word)
+
+                def make_support(j: int) -> Dict[str, Any]:
+                    txt = _escape_ass_text(block[j].word)
                     fn = _font_override(txt, int(fs * 1.12))
-                    if j == i:
-                        if st.get("hero_upper"):
-                            txt = txt.upper()
-                        elif st.get("hero_lower"):
-                            txt = txt.lower()
-                        hfn = fn or f"\\fn{hero_font}\\fs{hero_fs}"
-                        use_col = st.get("active", st["text"])
-                        use_hex = _ass_to_hex(use_col)
-                        anim = ""
-                        if anim_mode == "pop" or pop > 100:
-                            anim = (
-                                f"\\fscx90\\fscy90\\t(0,100,\\fscx{pop}\\fscy{pop})"
-                                f"\\t(100,180,\\fscx100\\fscy100)"
-                            )
-                        rows_out.append([dict(
-                            text=txt,
-                            tags=f"{hfn}\\c{use_col}{anim}",
-                            glow_hex=use_hex if (glow_cfg and glow_mult > 0) else None,
-                        )])
-                    else:
-                        sfn = fn or f"\\fs{support_fs}"
-                        rows_out.append([dict(
-                            text=txt,
-                            tags=f"{sfn}\\c{st['text']}",
-                            glow_hex=None,
-                        )])
+                    sfn = fn or f"\\fs{support_fs}"
+                    return dict(text=txt, tags=f"{sfn}\\c{st['text']}", glow_hex=None)
+
+                hero_txt = _escape_ass_text(w.word)
+                h_fn_ov = _font_override(hero_txt, int(fs * 1.12))
+                if st.get("hero_upper"):
+                    hero_txt = hero_txt.upper()
+                elif st.get("hero_lower"):
+                    hero_txt = hero_txt.lower()
+                hfn = h_fn_ov or f"\\fn{hero_font}\\fs{hero_fs}"
+                use_col = st.get("active", st["text"])
+                use_hex = _ass_to_hex(use_col)
+                h_anim = _active_word_anim()
+                if not h_anim and pop > 100:
+                    h_anim = (
+                        f"\\fscx90\\fscy90\\t(0,100,\\fscx{pop}\\fscy{pop})"
+                        f"\\t(100,180,\\fscx100\\fscy100)"
+                    )
+                hero_tok = dict(
+                    text=hero_txt,
+                    tags=f"{hfn}\\c{use_col}{h_anim}",
+                    glow_hex=use_hex if (glow_cfg and glow_mult > 0) else None,
+                )
+
+                if len(block) >= 4:
+                    if i > 0:
+                        rows_out.append([make_support(j) for j in range(0, i)])
+                    rows_out.append([hero_tok])
+                    if i + 1 < len(block):
+                        rows_out.append([make_support(j) for j in range(i + 1, len(block))])
+                else:
+                    for j in range(len(block)):
+                        rows_out.append([hero_tok] if j == i else [make_support(j)])
                 emit_tokens(ev_s, ev_e, ent, rows_out, reset)
             continue
 
@@ -766,17 +828,17 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         for i, w in enumerate(block):
             ev_s = block[0].start if i == 0 else w.start
             ev_e = word_end(i)
-            ent = _build_entrance_tags(anim_mode, W // 2, cy, pop, i == 0 or st["mode"] == "single") + line_tags
+            ent = _build_entrance_tags(anim_mode, W // 2, cy, pop, i == 0 or effective_mode == "single") + line_tags
 
-            if st["mode"] == "single":
+            if effective_mode == "single":
                 color = palette[word_counter % len(palette)] if palette else st["text"]
                 col_hex = _ass_to_hex(color)
                 tilt = f"\\frz{(-4 if word_counter % 2 else 4)}" if st.get("tilt") else ""
                 fn = _font_override(texts[i], int(fs * 1.12))
                 scale_anim = ""
-                if anim_mode == "pop" or st.get("pop", 100) > 100:
+                if anim_mode in ("pop", "word-by-word") or st.get("pop", 100) > 100:
                     scale_anim = (
-                        f"\\fscx75\\fscy75\\t(0,90,\\fscx{pop}\\fscy{pop})"
+                        f"\\fscx75\\fscy75\\t(0,90,\\fscx{max(108, pop)}\\fscy{max(108, pop)})"
                         f"\\t(90,170,\\fscx100\\fscy100)"
                     )
                 tok = dict(
@@ -814,11 +876,8 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                     anim = ""
                     if st.get("upcoming_blur"):
                         anim = f"\\blur{st['upcoming_blur']}\\alpha&H{st.get('upcoming_alpha', 0x88):02X}&\\t(0,120,\\blur0\\alpha&H00&)"
-                    elif anim_mode == "pop" and pop != 100:
-                        anim = (
-                            f"\\fscx92\\fscy92\\t(0,100,\\fscx{pop}\\fscy{pop})"
-                            f"\\t(100,180,\\fscx{100 + (pop - 100) // 2}\\fscy{100 + (pop - 100) // 2})"
-                        )
+                    else:
+                        anim = _active_word_anim()
                     row_tokens.append(dict(
                         text=w_txt,
                         tags=f"{fn}{face_tags}{color}{wob}{anim}",
@@ -833,15 +892,16 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                         glow_hex=None,
                     ))
                 else:
-                    # Inactive word: white glow only when preset itself uses white uniform glow (e.g. streamer/afterglow/clean glow)
+                    # Inactive word: white glow only when preset itself uses white uniform glow (e.g. chunk)
                     base_hex = _ass_to_hex(st["text"])
                     row_tokens.append(dict(
                         text=texts[j],
                         tags=fn,
-                        glow_hex=base_hex if (st["mode"] == "chunk" and glow_cfg and glow_mult > 0) else None,
+                        glow_hex=base_hex if (effective_mode == "chunk" and glow_cfg and glow_mult > 0) else None,
                     ))
 
-            emit_tokens(ev_s, ev_e, ent, [row_tokens], reset)
+            out_rows = [row_tokens[:wrap_mid], row_tokens[wrap_mid:]] if wrap_mid else [row_tokens]
+            emit_tokens(ev_s, ev_e, ent, out_rows, reset)
             word_counter += 1
 
     with open(output_path, "w", encoding="utf-8-sig") as f:

@@ -72,6 +72,7 @@ class JobRequest(BaseModel):
     caption_font: Optional[str] = None
     caption_animation: str = "auto"
     caption_glow: str = "auto"
+    caption_words: str = "auto"
     title_overlay: bool = True
     hindi_quality: str = "fast"
     webhook_url: Optional[str] = None
@@ -115,6 +116,7 @@ async def run_pipeline(
     caption_font: Optional[str] = None,
     caption_animation: str = "auto",
     caption_glow: str = "auto",
+    caption_words: str = "auto",
     title_overlay: bool = True,
     hindi_quality: str = "fast",
 ) -> Dict[str, Any]:
@@ -232,6 +234,7 @@ async def run_pipeline(
             caption_font=caption_font,
             caption_animation=caption_animation,
             caption_glow=caption_glow,
+            caption_words=caption_words,
             title_overlay=bool(title_overlay) and config.TITLE_OVERLAY,
             clip_source=clip_source,
         )
