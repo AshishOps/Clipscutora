@@ -97,3 +97,85 @@ body {
   outline: 2px solid #7f56d9;
   outline-offset: 3px;
 }
+
+/* Live WYSIWYG Caption Card Preview Animations */
+.caption-stroke {
+  paint-order: stroke fill;
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes cap-pop {
+  0%, 100% { transform: scale(1); }
+  20% { transform: scale(1.13); }
+  45% { transform: scale(1.06); }
+  75% { transform: scale(1.02); }
+}
+
+@keyframes cap-bounce-drop {
+  0%, 100% { transform: translateY(0) scale(1); }
+  12% { transform: translateY(-7px) scale(0.95); }
+  28% { transform: translateY(3px) scale(1.12); }
+  42% { transform: translateY(-2px) scale(1.02); }
+  58% { transform: translateY(0) scale(1); }
+}
+
+@keyframes cap-soft-rise {
+  0% { opacity: 0.55; transform: translateY(5px); }
+  30%, 85% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0.55; transform: translateY(5px); }
+}
+
+@keyframes cap-blur-in {
+  0% { filter: blur(3.5px); opacity: 0.45; transform: scale(1.04); }
+  28%, 82% { filter: blur(0px); opacity: 1; transform: scale(1); }
+  100% { filter: blur(3.5px); opacity: 0.45; transform: scale(1.04); }
+}
+
+@keyframes cap-word-wave {
+  0%, 100% { transform: translateY(0); }
+  25% { transform: translateY(-4px); }
+  65% { transform: translateY(1px); }
+}
+
+@keyframes cap-drift-right {
+  0% { opacity: 0.6; transform: translateX(-6px); }
+  30%, 85% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0.6; transform: translateX(-6px); }
+}
+
+@keyframes cap-focus-settle {
+  0% { transform: scale(1.14); filter: blur(2px); }
+  28%, 85% { transform: scale(1); filter: blur(0px); }
+  100% { transform: scale(1.14); filter: blur(2px); }
+}
+
+@keyframes cap-flicker {
+  0%, 100% { opacity: 1; }
+  8% { opacity: 0.5; }
+  14% { opacity: 1; }
+  20% { opacity: 0.72; }
+  26%, 88% { opacity: 1; }
+}
+
+@keyframes cap-karaoke {
+  0%, 10% { background-size: 0% 100%; }
+  55%, 85% { background-size: 100% 100%; }
+  100% { background-size: 0% 100%; }
+}
+
+.anim-cap-pop { animation: cap-pop 2.1s ease-out infinite; }
+.anim-cap-bounce-drop { animation: cap-bounce-drop 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
+.anim-cap-soft-rise { animation: cap-soft-rise 2.4s ease-out infinite; }
+.anim-cap-blur-in { animation: cap-blur-in 2.4s ease-out infinite; }
+.anim-cap-word-wave { animation: cap-word-wave 2s ease-in-out infinite; }
+.anim-cap-drift-right { animation: cap-drift-right 2.3s ease-out infinite; }
+.anim-cap-focus-settle { animation: cap-focus-settle 2.3s ease-out infinite; }
+.anim-cap-flicker-in { animation: cap-flicker 2.2s linear infinite; }
+.anim-cap-karaoke {
+  background-image: linear-gradient(90deg, #FFB300 0%, #FFB300 100%);
+  background-repeat: no-repeat;
+  background-position: left center;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: cap-karaoke 2.4s linear infinite;
+}

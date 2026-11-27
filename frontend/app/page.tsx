@@ -90,165 +90,452 @@ const LENGTH_PRESETS = [
   { id: "custom", label: "Custom", sub: "Custom range", min: 0, max: 0, tag: "Manual" },
 ];
 
-const STYLES = [
+type StyleWord = {
+  text: string;
+  active?: boolean;
+  upcoming?: boolean;
+  color?: string;
+};
+
+type CaptionStyleSpec = {
+  id: string;
+  label: string;
+  desc: string;
+  fontFamily: string;
+  fontWeight: number;
+  italic?: boolean;
+  upper: boolean;
+  fontSizePx: number;
+  textColor: string;
+  activeColor: string;
+  outlineColor: string;
+  strokePx: number;
+  shadowOffsetPx: number;
+  glowColor?: string;
+  glowBlurPx?: number;
+  tiltDeg?: number;
+  boxBg?: string;
+  boxRounded?: string;
+  anim: string;
+  popScale?: number;
+  mode: "single" | "highlight" | "chunk" | "karaoke" | "two_line" | "soft_focus";
+  words: StyleWord[];
+  row1?: { text: string; fontFamily: string; fontWeight: number; italic?: boolean; color: string };
+  row2?: { text: string; fontFamily: string; fontWeight: number; italic?: boolean; color: string; glowColor?: string };
+};
+
+const STYLES: CaptionStyleSpec[] = [
   {
     id: "streamer",
     label: "Streamer Pop",
-    desc: "Vibrant yellow active keywords with pop animation",
-    previewClass: "text-amber-500 dark:text-amber-300 font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]",
-    sampleText: "BHAI KYA SCENE HAI",
+    desc: "Yellow 1-3 words, zoom pop",
+    fontFamily: "'Arial Black', sans-serif",
+    fontWeight: 900,
+    upper: true,
+    fontSizePx: 15,
+    textColor: "#FFE135",
+    activeColor: "#FFE135",
+    outlineColor: "#000000",
+    strokePx: 3.5,
+    shadowOffsetPx: 2,
+    anim: "pop",
+    popScale: 1.12,
+    mode: "chunk",
+    words: [{ text: "BHAI" }, { text: "KYA", active: true }, { text: "SCENE" }],
   },
   {
     id: "hormozi",
     label: "Hormozi Impact",
-    desc: "Single-word reveal with punchy yellow emphasis",
-    previewClass: "text-amber-600 dark:text-yellow-400 font-black tracking-wide",
-    sampleText: "MASSIVE RESULT",
+    desc: "White words, yellow active word, reveal",
+    fontFamily: "'Arial Black', sans-serif",
+    fontWeight: 900,
+    upper: true,
+    fontSizePx: 14,
+    textColor: "#FFFFFF",
+    activeColor: "#FFE500",
+    outlineColor: "#000000",
+    strokePx: 3.5,
+    shadowOffsetPx: 2,
+    anim: "pop",
+    popScale: 1.1,
+    mode: "highlight",
+    words: [{ text: "THIS" }, { text: "WAS" }, { text: "MASSIVE", active: true }],
   },
   {
     id: "beast",
     label: "Mr Beast Bold",
-    desc: "Giant colorful typography with high-contrast borders",
-    previewClass: "text-emerald-600 dark:text-emerald-400 font-extrabold uppercase",
-    sampleText: "I CAN'T BELIEVE THIS",
+    desc: "One huge word at a time, colour cycling",
+    fontFamily: "Impact, 'Anton', sans-serif",
+    fontWeight: 400,
+    upper: true,
+    fontSizePx: 24,
+    textColor: "#3CFF4A",
+    activeColor: "#FFE500",
+    outlineColor: "#000000",
+    strokePx: 4.5,
+    shadowOffsetPx: 3,
+    tiltDeg: -3,
+    anim: "pop",
+    popScale: 1.12,
+    mode: "single",
+    words: [{ text: "INSANE", active: true, color: "#FFE500" }],
   },
   {
     id: "neon",
     label: "Cyber Neon",
-    desc: "Glowing lime neon strokes with futuristic aura",
-    previewClass: "text-lime-600 dark:text-lime-400 font-black drop-shadow-[0_0_8px_rgba(132,204,22,0.6)]",
-    sampleText: "NEXT LEVEL GAMING",
+    desc: "Glowing lime outline, electric pop",
+    fontFamily: "'Segoe UI Black', 'Montserrat', sans-serif",
+    fontWeight: 900,
+    upper: true,
+    fontSizePx: 14,
+    textColor: "#FFFFFF",
+    activeColor: "#A3FF12",
+    outlineColor: "#4BC800",
+    strokePx: 2.5,
+    shadowOffsetPx: 0,
+    glowColor: "#A3FF12",
+    glowBlurPx: 12,
+    anim: "pop",
+    popScale: 1.12,
+    mode: "highlight",
+    words: [{ text: "NEXT" }, { text: "LEVEL", active: true }, { text: "PLAY" }],
   },
   {
     id: "boxed",
     label: "Subtitle Box",
-    desc: "Classic white bold letters over solid black badge",
-    previewClass: "bg-black text-white font-bold px-2 py-0.5 rounded shadow-sm",
-    sampleText: "WATCH TILL THE END",
+    desc: "White text on solid black box, yellow active",
+    fontFamily: "'Arial Black', sans-serif",
+    fontWeight: 900,
+    upper: true,
+    fontSizePx: 13,
+    textColor: "#FFFFFF",
+    activeColor: "#FFE500",
+    outlineColor: "transparent",
+    strokePx: 0,
+    shadowOffsetPx: 0,
+    boxBg: "#000000",
+    boxRounded: "4px",
+    anim: "none",
+    mode: "highlight",
+    words: [{ text: "WATCH" }, { text: "TILL", active: true }, { text: "END" }],
   },
   {
     id: "karaoke",
     label: "Karaoke Sync",
-    desc: "Word-by-word progressive color fill as spoken",
-    previewClass: "text-brand-600 dark:text-brand-300 font-bold",
-    sampleText: "SPEECH SYNC ACTIVE",
+    desc: "Words fill orange as they are spoken",
+    fontFamily: "'Arial Black', sans-serif",
+    fontWeight: 900,
+    upper: true,
+    fontSizePx: 14,
+    textColor: "#FFFFFF",
+    activeColor: "#FFB300",
+    outlineColor: "#000000",
+    strokePx: 3.5,
+    shadowOffsetPx: 2,
+    anim: "none",
+    mode: "karaoke",
+    words: [{ text: "SPEECH" }, { text: "SYNC" }, { text: "NOW" }],
   },
   {
     id: "fire",
     label: "Flame Gold",
-    desc: "Gold fiery outline with red gradient glow",
-    previewClass: "text-amber-600 dark:text-amber-400 font-black drop-shadow-[0_2px_6px_rgba(239,68,68,0.5)]",
-    sampleText: "PURE ENERGY",
+    desc: "Gold Impact text, red outline, white pop",
+    fontFamily: "Impact, 'Anton', sans-serif",
+    fontWeight: 400,
+    upper: true,
+    fontSizePx: 20,
+    textColor: "#FFC300",
+    activeColor: "#FFFFFF",
+    outlineColor: "#D7141A",
+    strokePx: 3.5,
+    shadowOffsetPx: 2.5,
+    glowColor: "#FF4D00",
+    glowBlurPx: 14,
+    anim: "pop",
+    popScale: 1.15,
+    mode: "chunk",
+    words: [{ text: "PURE" }, { text: "ENERGY", active: true }],
   },
   {
     id: "meme",
     label: "3D Meme",
-    desc: "Playful comic font with deep extruded shadow",
-    previewClass: "text-gray-900 dark:text-white font-black drop-shadow-[1px_1px_0px_rgba(0,0,0,0.6)]",
-    sampleText: "NO WAY BRO 😂",
+    desc: "Comic font, 3D shadow, wobble",
+    fontFamily: "'Comic Sans MS', 'Bangers', cursive",
+    fontWeight: 700,
+    upper: true,
+    fontSizePx: 15,
+    textColor: "#FFFFFF",
+    activeColor: "#FFE500",
+    outlineColor: "#000000",
+    strokePx: 4,
+    shadowOffsetPx: 3.5,
+    tiltDeg: -2,
+    anim: "pop",
+    popScale: 1.12,
+    mode: "highlight",
+    words: [{ text: "NO" }, { text: "WAY", active: true }, { text: "BRO" }],
   },
   {
     id: "clean",
     label: "Minimal Clean",
-    desc: "Ultra-clean modern subtitle with soft ambient shadow",
-    previewClass: "text-gray-800 dark:text-zinc-100 font-medium tracking-tight",
-    sampleText: "Smooth & Minimal",
+    desc: "Minimal white with soft shadow & warm focus",
+    fontFamily: "'Segoe UI', 'Inter', sans-serif",
+    fontWeight: 600,
+    upper: false,
+    fontSizePx: 14,
+    textColor: "#FFFFFF",
+    activeColor: "#FFF3A0",
+    outlineColor: "transparent",
+    strokePx: 0,
+    shadowOffsetPx: 2,
+    anim: "soft-rise",
+    mode: "highlight",
+    words: [{ text: "Smooth" }, { text: "&" }, { text: "Minimal", active: true }],
   },
   {
     id: "bouncy_trendy",
     label: "Bouncy Trendy",
-    desc: "Two-line spring bounce drop with bright lime highlight",
-    previewClass: "text-lime-400 font-black uppercase drop-shadow-[0_0_10px_rgba(163,230,53,0.75)]",
-    previewStyle: { fontFamily: "'Montserrat', sans-serif", fontWeight: 900 },
-    sampleText: "STOP SCROLLING",
+    desc: "Italic white lead over lime glow punchline, bouncy drop",
+    fontFamily: "'Kanit', sans-serif",
+    fontWeight: 900,
+    italic: true,
+    upper: true,
+    fontSizePx: 15,
+    textColor: "#ECECEC",
+    activeColor: "#C4FF00",
+    outlineColor: "#000000",
+    strokePx: 3,
+    shadowOffsetPx: 2,
+    glowColor: "#C4FF00",
+    glowBlurPx: 14,
+    anim: "bounce-drop",
+    mode: "two_line",
+    words: [],
+    row1: { text: "WAIT FOR", fontFamily: "'Inter', sans-serif", fontWeight: 500, italic: true, color: "#ECECEC" },
+    row2: { text: "THIS DROP", fontFamily: "'Kanit', sans-serif", fontWeight: 900, italic: true, color: "#C4FF00", glowColor: "#C4FF00" },
   },
   {
     id: "aura_glow",
     label: "Aura Glow",
-    desc: "Soft multi-layer white halo with crisp dark edge",
-    previewClass: "text-white font-extrabold drop-shadow-[0_0_12px_rgba(255,255,255,0.85)]",
-    previewStyle: { fontFamily: "'Poppins', sans-serif", fontWeight: 800 },
-    sampleText: "SOFT WHITE AURA",
+    desc: "Crisp white stack with glowing electric green center word",
+    fontFamily: "'Montserrat', sans-serif",
+    fontWeight: 900,
+    upper: true,
+    fontSizePx: 14,
+    textColor: "#FFFFFF",
+    activeColor: "#16FF00",
+    outlineColor: "#000000",
+    strokePx: 3,
+    shadowOffsetPx: 2,
+    glowColor: "#16FF00",
+    glowBlurPx: 16,
+    anim: "pop",
+    popScale: 1.12,
+    mode: "highlight",
+    words: [{ text: "ZERO" }, { text: "LIMITS", active: true }, { text: "LEFT" }],
   },
   {
     id: "word_by_word",
     label: "Word by Word",
-    desc: "Rapid center single-word punch in bold uppercase",
-    previewClass: "text-white font-black uppercase tracking-wider drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]",
-    previewStyle: { fontFamily: "'Archivo Black', sans-serif" },
-    sampleText: "UNSTOPPABLE",
+    desc: "Clean Inter white type rising smoothly word by word",
+    fontFamily: "'Inter', sans-serif",
+    fontWeight: 700,
+    upper: false,
+    fontSizePx: 14,
+    textColor: "#FFFFFF",
+    activeColor: "#E4E4E7",
+    outlineColor: "#000000",
+    strokePx: 2,
+    shadowOffsetPx: 1.5,
+    glowColor: "#FFFFFF",
+    glowBlurPx: 8,
+    anim: "word-by-word",
+    mode: "highlight",
+    words: [{ text: "Keep" }, { text: "building" }, { text: "fast", active: true }],
   },
   {
     id: "word_staircase",
     label: "Word Staircase",
-    desc: "Staggered two-line alternating word emphasis",
-    previewClass: "text-cyan-300 font-extrabold drop-shadow-[0_0_8px_rgba(34,211,238,0.6)]",
-    previewStyle: { fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800 },
-    sampleText: "STEP BY STEP",
+    desc: "Condensed Oswald caps climbing out of soft blur",
+    fontFamily: "'Oswald', sans-serif",
+    fontWeight: 700,
+    upper: true,
+    fontSizePx: 17,
+    textColor: "#FFFFFF",
+    activeColor: "#C4FF00",
+    outlineColor: "#000000",
+    strokePx: 3,
+    shadowOffsetPx: 2,
+    glowColor: "#8ABE4C",
+    glowBlurPx: 12,
+    anim: "word-wave",
+    mode: "highlight",
+    words: [{ text: "STEP" }, { text: "BY", active: true }, { text: "STEP" }],
   },
   {
     id: "deep_pop",
     label: "Deep Pop",
-    desc: "Cool slate-blue aura glow with smooth kinetic pop",
-    previewClass: "text-sky-200 font-bold drop-shadow-[0_0_10px_rgba(56,189,248,0.75)]",
-    previewStyle: { fontFamily: "'Inter', sans-serif", fontWeight: 700 },
-    sampleText: "DEEP FOCUS MODE",
+    desc: "Montserrat Black with deep layered azure neon bloom",
+    fontFamily: "'Montserrat', sans-serif",
+    fontWeight: 900,
+    upper: true,
+    fontSizePx: 14,
+    textColor: "#FFFFFF",
+    activeColor: "#60A5FA",
+    outlineColor: "#0B1736",
+    strokePx: 3.2,
+    shadowOffsetPx: 1.5,
+    glowColor: "#456FFD",
+    glowBlurPx: 16,
+    anim: "focus-settle",
+    popScale: 1.12,
+    mode: "highlight",
+    words: [{ text: "STAY" }, { text: "IN" }, { text: "FLOW", active: true }],
   },
   {
     id: "kinetic_hook",
-    label: "Kinetic Hook",
-    desc: "Warm orange & white high-velocity italic hook",
-    previewClass: "text-orange-400 font-black italic uppercase drop-shadow-[0_0_10px_rgba(251,146,60,0.75)]",
-    previewStyle: { fontFamily: "'Kanit', sans-serif", fontWeight: 900, fontStyle: "italic" },
-    sampleText: "FAST MOMENTUM",
+    label: "Kinetic Orange",
+    desc: "White & blazing orange type resolving out of blur",
+    fontFamily: "'Montserrat', sans-serif",
+    fontWeight: 900,
+    upper: true,
+    fontSizePx: 14,
+    textColor: "#FFFFFF",
+    activeColor: "#FF6B00",
+    outlineColor: "#000000",
+    strokePx: 3,
+    shadowOffsetPx: 2,
+    glowColor: "#FF6B00",
+    glowBlurPx: 16,
+    anim: "blur-in",
+    popScale: 1.1,
+    mode: "highlight",
+    words: [{ text: "ACT" }, { text: "RIGHT", active: true }, { text: "NOW" }],
   },
   {
     id: "afterglow",
     label: "Afterglow",
-    desc: "Crisp white typography with luminous cyan afterglow",
-    previewClass: "text-cyan-100 font-extrabold drop-shadow-[0_0_12px_rgba(34,211,238,0.85)]",
-    previewStyle: { fontFamily: "'Poppins', sans-serif", fontWeight: 800 },
-    sampleText: "PURE CLARITY",
+    desc: "Warm radiant yellow Archivo Black with soft golden bloom",
+    fontFamily: "'Archivo Black', sans-serif",
+    fontWeight: 400,
+    upper: true,
+    fontSizePx: 14,
+    textColor: "#FAF830",
+    activeColor: "#FFFFFF",
+    outlineColor: "#2A2000",
+    strokePx: 3,
+    shadowOffsetPx: 2,
+    glowColor: "#FAF830",
+    glowBlurPx: 16,
+    anim: "soft-rise",
+    popScale: 1.08,
+    mode: "chunk",
+    words: [{ text: "PURE" }, { text: "GOLD", active: true }, { text: "AURA" }],
   },
   {
     id: "devin_jatho",
-    label: "Creator Editorial",
-    desc: "Luxury serif italic hook with golden cyan contrast",
-    previewClass: "text-amber-300 font-bold italic drop-shadow-[0_0_8px_rgba(251,191,36,0.65)]",
-    previewStyle: { fontFamily: "'Playfair Display', serif", fontWeight: 700, fontStyle: "italic" },
-    sampleText: "Golden Secret",
+    label: "Devin Jatho",
+    desc: "Heavy white lead over glowing crimson emphasis line",
+    fontFamily: "'Kanit', sans-serif",
+    fontWeight: 900,
+    italic: true,
+    upper: true,
+    fontSizePx: 15,
+    textColor: "#FFFFFF",
+    activeColor: "#FF2424",
+    outlineColor: "#000000",
+    strokePx: 3,
+    shadowOffsetPx: 2,
+    glowColor: "#FF0000",
+    glowBlurPx: 15,
+    anim: "drift-right",
+    mode: "two_line",
+    words: [],
+    row1: { text: "DON'T MISS", fontFamily: "'Kanit', sans-serif", fontWeight: 900, italic: true, color: "#FFFFFF" },
+    row2: { text: "THIS ONE", fontFamily: "'Kanit', sans-serif", fontWeight: 900, italic: true, color: "#FF2424", glowColor: "#FF0000" },
   },
   {
     id: "soft_focus",
     label: "Soft Focus",
-    desc: "Dimmed upcoming words snapping into sharp amber focus",
-    previewClass: "text-amber-200 font-bold drop-shadow-[0_0_10px_rgba(253,224,71,0.55)]",
-    previewStyle: { fontFamily: "'Montserrat', sans-serif", fontWeight: 700 },
-    sampleText: "Sharpen Focus",
+    desc: "Unspoken words stay blurred and snap crisp on timestamp",
+    fontFamily: "'Inter', sans-serif",
+    fontWeight: 700,
+    upper: false,
+    fontSizePx: 13.5,
+    textColor: "#FFFFFF",
+    activeColor: "#FFFFFF",
+    outlineColor: "#000000",
+    strokePx: 2,
+    shadowOffsetPx: 1.5,
+    glowColor: "#FFFFFF",
+    glowBlurPx: 8,
+    anim: "blur-in",
+    mode: "soft_focus",
+    words: [
+      { text: "Watch" },
+      { text: "focus", active: true },
+      { text: "snap", upcoming: true },
+      { text: "in", upcoming: true },
+    ],
   },
   {
     id: "postcard",
-    label: "Postcard Pill",
-    desc: "Dark frosted badge container with mint green highlight",
-    previewClass: "bg-zinc-900/95 text-emerald-300 font-bold px-2.5 py-0.5 rounded-full border border-white/15 shadow-sm",
-    previewStyle: { fontFamily: "'Inter', sans-serif", fontWeight: 700 },
-    sampleText: "CLEAN PILL TAG",
+    label: "Postcard",
+    desc: "Dark serif on clean white pill card, active highlight",
+    fontFamily: "'Playfair Display', serif",
+    fontWeight: 700,
+    upper: false,
+    fontSizePx: 13.5,
+    textColor: "#18181B",
+    activeColor: "#4F46E5",
+    outlineColor: "transparent",
+    strokePx: 0,
+    shadowOffsetPx: 0,
+    boxBg: "#FFFFFF",
+    boxRounded: "8px",
+    anim: "soft-rise",
+    mode: "highlight",
+    words: [{ text: "Clean" }, { text: "editorial", active: true }, { text: "vibe" }],
   },
   {
     id: "neon_splash",
     label: "Neon Splash",
-    desc: "Electric cyan-magenta splash glow for hype moments",
-    previewClass: "text-fuchsia-400 font-black tracking-wide drop-shadow-[0_0_12px_rgba(232,121,249,0.85)]",
-    previewStyle: { fontFamily: "'Bangers', cursive" },
-    sampleText: "EPIC CLUTCH!",
+    desc: "White 3-word splash with intense lime halo",
+    fontFamily: "'Montserrat', sans-serif",
+    fontWeight: 900,
+    upper: true,
+    fontSizePx: 14,
+    textColor: "#FFFFFF",
+    activeColor: "#A0D83E",
+    outlineColor: "#000000",
+    strokePx: 3,
+    shadowOffsetPx: 1.5,
+    glowColor: "#A0D83E",
+    glowBlurPx: 16,
+    anim: "focus-settle",
+    popScale: 1.12,
+    mode: "highlight",
+    words: [{ text: "NEXT" }, { text: "LEVEL", active: true }, { text: "HYPE" }],
   },
   {
     id: "gold_sweep",
     label: "Gold Sweep",
-    desc: "Progressive warm gold karaoke sweep with amber bloom",
-    previewClass: "text-amber-300 font-bold tracking-wider drop-shadow-[0_0_10px_rgba(245,158,11,0.75)]",
-    previewStyle: { fontFamily: "'Bebas Neue', sans-serif" },
-    sampleText: "MILLION DOLLAR",
+    desc: "Tall Anton caps with rich gold fill & amber halo",
+    fontFamily: "'Anton', sans-serif",
+    fontWeight: 400,
+    upper: true,
+    fontSizePx: 19,
+    textColor: "#FFDE00",
+    activeColor: "#FFFFFF",
+    outlineColor: "#000000",
+    strokePx: 3.5,
+    shadowOffsetPx: 2.5,
+    glowColor: "#FFA318",
+    glowBlurPx: 14,
+    anim: "pop",
+    popScale: 1.12,
+    mode: "chunk",
+    words: [{ text: "MILLION" }, { text: "DOLLAR", active: true }],
   },
 ];
 
@@ -270,10 +557,188 @@ const FONTS = [
   { id: "Caveat", label: "Caveat Script", css: "'Caveat', cursive", weight: 700 },
   { id: "Bangers", label: "Bangers Comic", css: "'Bangers', cursive", weight: 400 },
   { id: "Arial Black", label: "Arial Black", css: "'Arial Black', sans-serif", weight: 900 },
-  { id: "Impact", label: "Impact", css: "Impact, sans-serif", weight: 700 },
+  { id: "Impact", label: "Impact", css: "Impact, sans-serif", weight: 400 },
   { id: "Segoe UI Black", label: "Segoe UI Black", css: "'Segoe UI Black', sans-serif", weight: 900 },
   { id: "Verdana", label: "Verdana", css: "Verdana, sans-serif", weight: 700 },
 ];
+
+const GLOW_SCALE_MAP: Record<string, number> = {
+  auto: 1,
+  off: 0,
+  subtle: 0.55,
+  medium: 1,
+  intense: 1.5,
+};
+
+function CaptionStylePreview({
+  spec,
+  overrideFont,
+  overrideAnimation,
+  overrideGlow,
+}: {
+  spec: CaptionStyleSpec;
+  overrideFont: string;
+  overrideAnimation: string;
+  overrideGlow: string;
+}) {
+  const chosenFont = overrideFont ? FONTS.find((f) => f.id === overrideFont) : undefined;
+  const effectiveFont = chosenFont?.css && chosenFont.css !== "inherit" ? chosenFont.css : spec.fontFamily;
+  const effectiveWeight = chosenFont?.weight ?? spec.fontWeight;
+  const effectiveItalic = chosenFont?.italic ?? spec.italic;
+  const effectiveAnim = overrideAnimation === "auto" ? spec.anim : overrideAnimation;
+  const glowMult = GLOW_SCALE_MAP[overrideGlow] ?? 1;
+
+  const animClass =
+    effectiveAnim === "none"
+      ? ""
+      : effectiveAnim === "word-by-word"
+      ? "anim-cap-soft-rise"
+      : `anim-cap-${effectiveAnim}`;
+
+  const buildShadow = (glowHex?: string, blurPx?: number, isActive?: boolean) => {
+    const parts: string[] = [];
+    if (spec.shadowOffsetPx > 0) {
+      parts.push(`${spec.shadowOffsetPx}px ${spec.shadowOffsetPx}px 0px rgba(0,0,0,0.85)`);
+    }
+    if (!spec.glowColor && spec.strokePx === 0 && spec.shadowOffsetPx > 0) {
+      parts.push(`0 2px 8px rgba(0,0,0,0.75)`);
+    }
+    if (glowHex && blurPx && glowMult > 0) {
+      const r1 = Math.round(blurPx * 0.45 * glowMult);
+      const r2 = Math.round(blurPx * glowMult);
+      const r3 = Math.round(blurPx * 1.6 * glowMult);
+      parts.push(`0 0 ${r1}px ${glowHex}`);
+      parts.push(`0 0 ${r2}px ${glowHex}`);
+      if (isActive || glowMult >= 1.2) {
+        parts.push(`0 0 ${r3}px ${glowHex}`);
+      }
+    }
+    return parts.length ? parts.join(", ") : undefined;
+  };
+
+  const wordStyle = (w?: StyleWord, customGlow?: string): React.CSSProperties => ({
+    fontFamily: effectiveFont,
+    fontWeight: effectiveWeight,
+    fontStyle: effectiveItalic ? "italic" : "normal",
+    fontSize: `${spec.fontSizePx}px`,
+    lineHeight: 1.15,
+    color: w?.color || (w?.active ? spec.activeColor : spec.textColor),
+    WebkitTextStroke:
+      spec.strokePx > 0 && spec.outlineColor !== "transparent"
+        ? `${spec.strokePx}px ${spec.outlineColor}`
+        : undefined,
+    textShadow: buildShadow(customGlow ?? spec.glowColor, spec.glowBlurPx, w?.active),
+    transform: w?.active && spec.popScale && spec.popScale > 1 ? `scale(${spec.popScale})` : undefined,
+    opacity: w?.upcoming ? 0.48 : 1,
+    filter: w?.upcoming ? "blur(2.2px)" : undefined,
+    display: "inline-block",
+  });
+
+  return (
+    <div className="relative h-[74px] w-full rounded-xl bg-gradient-to-b from-zinc-900 via-[#0d0e13] to-black border border-zinc-800/80 px-2.5 flex items-center justify-center overflow-hidden select-none">
+      {/* Subtle 9:16 video vignette & ambient light behind captions */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-40"
+        style={{
+          background: spec.glowColor && glowMult > 0
+            ? `radial-gradient(circle at 50% 55%, ${spec.glowColor}26 0%, transparent 70%)`
+            : "radial-gradient(circle at 50% 55%, rgba(255,255,255,0.06) 0%, transparent 70%)",
+        }}
+      />
+
+      {spec.mode === "two_line" && spec.row1 && spec.row2 ? (
+        <div className="relative z-10 flex flex-col items-center justify-center leading-none gap-0.5 text-center">
+          <span
+            className="caption-stroke tracking-tight"
+            style={{
+              fontFamily: chosenFont?.css && chosenFont.css !== "inherit" ? chosenFont.css : spec.row1.fontFamily,
+              fontWeight: spec.row1.fontWeight,
+              fontStyle: spec.row1.italic ? "italic" : "normal",
+              fontSize: "11px",
+              color: spec.row1.color,
+              WebkitTextStroke: `${Math.max(2, spec.strokePx - 0.5)}px ${spec.outlineColor}`,
+              textShadow: "0 2px 4px rgba(0,0,0,0.8)",
+            }}
+          >
+            {spec.row1.text}
+          </span>
+          <span
+            className={`caption-stroke tracking-wide ${animClass}`}
+            style={{
+              fontFamily: chosenFont?.css && chosenFont.css !== "inherit" ? chosenFont.css : spec.row2.fontFamily,
+              fontWeight: spec.row2.fontWeight,
+              fontStyle: spec.row2.italic ? "italic" : "normal",
+              fontSize: `${spec.fontSizePx}px`,
+              color: spec.row2.color,
+              WebkitTextStroke: `${spec.strokePx}px ${spec.outlineColor}`,
+              textShadow: buildShadow(spec.row2.glowColor, spec.glowBlurPx, true),
+            }}
+          >
+            {spec.row2.text}
+          </span>
+        </div>
+      ) : spec.mode === "karaoke" ? (
+        <div
+          className={`relative z-10 inline-flex items-center gap-1.5 ${spec.upper ? "uppercase" : ""} ${animClass}`}
+        >
+          {spec.words.map((w, i) => {
+            const phrase = spec.words.map((x) => x.text).join(" ");
+            return i === 0 ? (
+              <span key={i} className="relative inline-block">
+                {/* Base white text with crisp black outline */}
+                <span className="caption-stroke" style={wordStyle({ text: phrase })}>
+                  {phrase}
+                </span>
+                {/* Animated orange progressive fill */}
+                <span
+                  aria-hidden
+                  className="anim-cap-karaoke pointer-events-none absolute inset-0 text-transparent"
+                  style={{
+                    fontFamily: effectiveFont,
+                    fontWeight: effectiveWeight,
+                    fontSize: `${spec.fontSizePx}px`,
+                    lineHeight: 1.15,
+                  }}
+                >
+                  {phrase}
+                </span>
+              </span>
+            ) : null;
+          })}
+        </div>
+      ) : (
+        <div
+          className={`relative z-10 flex items-center justify-center flex-wrap gap-x-1.5 ${
+            spec.upper ? "uppercase" : ""
+          }`}
+          style={{
+            backgroundColor: spec.boxBg,
+            borderRadius: spec.boxRounded,
+            padding: spec.boxBg ? "4px 10px" : undefined,
+            boxShadow: spec.boxBg === "#FFFFFF" ? "0 4px 14px rgba(0,0,0,0.45)" : undefined,
+            transform: spec.tiltDeg ? `rotate(${spec.tiltDeg}deg)` : undefined,
+          }}
+        >
+          {spec.words.map((w, idx) => (
+            <span
+              key={idx}
+              className={`caption-stroke ${w.active || effectiveAnim === "word-wave" || effectiveAnim === "word-by-word" ? animClass : ""}`}
+              style={{
+                ...wordStyle(w),
+                animationDelay:
+                  effectiveAnim === "word-wave" || effectiveAnim === "word-by-word"
+                    ? `${idx * 160}ms`
+                    : undefined,
+              }}
+            >
+              {w.text}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const ANIMATIONS = [
   { id: "auto", label: "Style Default (Auto)" },
@@ -848,11 +1313,12 @@ export default function HomePage() {
                         selected={captionPreset === s.id}
                         onClick={() => setCaptionPreset(s.id)}
                         preview={
-                          <div className="p-2.5 rounded-xl bg-gray-900 dark:bg-black/75 border border-gray-200 dark:border-zinc-800/80 text-center">
-                            <span className={`text-xs ${s.previewClass}`} style={s.previewStyle}>
-                              {s.sampleText}
-                            </span>
-                          </div>
+                          <CaptionStylePreview
+                            spec={s}
+                            overrideFont={font}
+                            overrideAnimation={captionAnimation}
+                            overrideGlow={captionGlow}
+                          />
                         }
                       />
                     ))}
