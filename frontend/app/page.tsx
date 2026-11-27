@@ -367,13 +367,13 @@ const STYLES: CaptionStyleSpec[] = [
     outlineColor: "#000000",
     strokePx: 3,
     shadowOffsetPx: 2,
-    glowColor: "#FF1E00",
+    glowColor: "#FF6D00",
     glowBlurPx: 14,
     anim: "soft-rise",
     mode: "two_line",
     words: [],
     row1: { text: "NOW PAY", fontFamily: "'Montserrat', sans-serif", fontWeight: 700, italic: false, upper: true, color: "#FFFFFF", scale: 0.72 },
-    row2: { text: "ATTENTION", fontFamily: "'Montserrat', sans-serif", fontWeight: 900, italic: true, upper: true, color: "#FF6D00", glowColor: "#FF1E00" },
+    row2: { text: "ATTENTION", fontFamily: "'Montserrat', sans-serif", fontWeight: 900, italic: true, upper: true, color: "#FF6D00", glowColor: "#FF6D00" },
   },
   {
     id: "trading_bro",
@@ -484,7 +484,7 @@ const STYLES: CaptionStyleSpec[] = [
     anim: "bounce-drop",
     mode: "two_line",
     words: [],
-    row1: { text: "ONE IDEA", fontFamily: "'Inter', sans-serif", fontWeight: 500, italic: true, upper: true, color: "#ECECEC", scale: 0.78 },
+    row1: { text: "ONE IDEA", fontFamily: "'Inter', sans-serif", fontWeight: 500, italic: true, upper: true, color: "#ECECEC", glowColor: "#ECECEC", scale: 0.78 },
     row2: { text: "TEN HOOKS", fontFamily: "'Kanit', sans-serif", fontWeight: 900, italic: true, upper: true, color: "#C4FF00", glowColor: "#C4FF00" },
   },
   {
@@ -689,6 +689,9 @@ function CaptionStylePreview({
     const baseColor =
       cycleColor ||
       (active ? spec.activeColor : spec.textColor);
+    const renderedColor = !interactive && w?.color ? w.color : baseColor;
+    const matchedGlow =
+      customGlow ?? (heroWord || active ? (fallbackGlow ? renderedColor : undefined) : undefined);
     const wFont =
       chosenFont?.css && chosenFont.css !== "inherit"
         ? chosenFont.css
@@ -710,13 +713,13 @@ function CaptionStylePreview({
       fontStyle: wItalic ? "italic" : "normal",
       fontSize: `${fs}px`,
       lineHeight: 1.05,
-      color: !interactive && w?.color ? w.color : baseColor,
+      color: renderedColor,
       WebkitTextStroke:
         spec.strokePx > 0 && spec.outlineColor !== "transparent"
           ? `${spec.strokePx * (interactive ? 1.15 : 1)}px ${spec.outlineColor}`
           : undefined,
       textShadow: buildShadow(
-        customGlow ?? (heroWord || active ? fallbackGlow : undefined),
+        matchedGlow,
         fallbackBlur,
         active || heroWord
       ),
