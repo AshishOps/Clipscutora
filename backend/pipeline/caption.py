@@ -193,107 +193,134 @@ CAPTION_STYLES: Dict[str, Dict[str, Any]] = {
         mode="highlight", reveal=False, max_words=4, upper=False, pop=104, anim="soft-rise",
     ),
 
-    # ── Samsaam-Inspired Creator Styles ────────────────────────────────────────
+    # ── Exact 12 Samsaam Showcase Styles (samsaam.io) ──────────────────────────
+    "portugal": dict(
+        label="Portugal", desc="White Inter stack with red Playfair italic emphasis words",
+        font="Inter", size=88, char_w=0.64, text=WHITE, active=_rgb("FF0000"),
+        outline=BLACK, border=4, shadow=2, back=_rgb("000000", 0x55),
+        emphasis_face=dict(font="Playfair Display", italic=True, scale=1.24, upper=False),
+        mode="highlight", reveal=False, max_words=4, upper=False, pop=108, anim="word-by-word",
+    ),
+    "business": dict(
+        label="Business", desc="Crisp white TeX Gyre Heros around huge lime-gold hero word",
+        font="TeXGyreHeros", size=78, char_w=0.66, text=WHITE, active=_rgb("A8E34B"),
+        outline=BLACK, border=4, shadow=2, back=BLACK,
+        glow=dict(color="A8E34B", strength=38, blur=14),
+        hero_font="TeXGyreHeros", hero_scale=1.62, hero_upper=True,
+        mode="splash_hero", max_words=4, upper=False, pop=110, anim="drift-right",
+    ),
+    "attention": dict(
+        label="Attention", desc="Small white Montserrat lead; blazing orange italic punchline",
+        font="Montserrat ExtraBold", size=86, char_w=0.78, text=WHITE, active=_rgb("FF6D00"),
+        outline=BLACK, border=5, shadow=3, back=BLACK,
+        glow=dict(color="FF1E00", strength=70, blur=16),
+        row1_font="Montserrat", row1_color=WHITE, row1_scale=66, row1_italic=False, row1_upper=True,
+        row2_italic=True, row2_upper=True, row2_scale=108,
+        mode="two_line", max_words=4, upper=True, pop=112, anim="soft-rise",
+    ),
+    "trading_bro": dict(
+        label="Trading Bro", desc="Small white Inter words tucked under glowing red Poppins caps",
+        font="Inter", size=72, char_w=0.64, text=WHITE, active=_rgb("E90000"),
+        outline=BLACK, border=4, shadow=3, back=BLACK,
+        glow=dict(color="E90000", strength=72, blur=18),
+        hero_font="Poppins", hero_scale=1.50, hero_lower=True,
+        mode="splash_hero", max_words=4, upper=False, pop=110, anim="word-by-word",
+    ),
+    "aura_glow": dict(
+        label="Aura Glow", desc="White Inter composition around electric neon-green centre word",
+        font="Inter", size=78, char_w=0.64, text=WHITE, active=_rgb("16FF00"),
+        outline=BLACK, border=5, shadow=2, back=BLACK,
+        glow=dict(color="16FF00", strength=78, blur=24),
+        hero_font="Montserrat Black", hero_scale=1.42, hero_upper=True,
+        mode="splash_hero", max_words=3, upper=False, pop=114, anim="drift-right",
+    ),
+    "crazy": dict(
+        label="Crazy", desc="Bold Plus Jakarta Sans stack with electric blue callout words",
+        font="Plus Jakarta Sans ExtraBold", size=84, char_w=0.72, text=WHITE, active=_rgb("0064FF"),
+        outline=BLACK, border=4, shadow=2, back=BLACK,
+        glow=dict(color="FFFFFF", strength=42, blur=16),
+        mode="highlight", reveal=False, max_words=4, upper=False, pop=110, anim="word-wave",
+    ),
+    "real_shamani": dict(
+        label="Real Shamani", desc="Uppercase Montserrat stack with neon colour-cycling emphasis",
+        font="Montserrat ExtraBold", size=82, char_w=0.78, text=WHITE, active=_rgb("22E55B"),
+        active_palette=[
+            _rgb("22E55B"), _rgb("2F7BFF"), _rgb("FF4FB8"), _rgb("FF8A1F"),
+            _rgb("F5F51A"), _rgb("19E3F0"), _rgb("FF2A2A"),
+        ],
+        outline=BLACK, border=5, shadow=4, back=_rgb("000000", 0x55),
+        glow=dict(color="FFFFFF", strength=30, blur=14),
+        mode="highlight", reveal=False, max_words=4, upper=True, pop=112, anim="word-wave",
+    ),
     "bouncy_trendy": dict(
-        label="Bouncy Trendy", desc="Italic white lead over lime glow punchline, bouncy drop",
+        label="Bouncy Trendy", desc="Italic Inter white lead over glowing lime Kanit punchline",
         font="Kanit Black", size=88, char_w=0.72, text=_rgb("ECECEC"), active=_rgb("C4FF00"),
         outline=BLACK, border=5, shadow=4, back=_rgb("000000", 0x50),
         glow=dict(color="C4FF00", strength=72, blur=19),
-        row1_font="Inter Medium", row1_italic=True, row1_scale=88,
+        row1_font="Inter Medium", row1_color=_rgb("ECECEC"), row1_italic=True, row1_scale=88, row1_upper=True,
+        row2_italic=True, row2_upper=True, row2_scale=110,
         mode="two_line", max_words=4, upper=True, pop=112, anim="bounce-drop",
     ),
-    "aura_glow": dict(
-        label="Aura Glow", desc="Crisp white stack with glowing electric green center word",
-        font="Montserrat Black", size=88, char_w=0.78, text=WHITE, active=_rgb("16FF00"),
-        outline=BLACK, border=5, shadow=3, back=BLACK,
-        glow=dict(color="16FF00", strength=75, blur=24),
-        mode="highlight", reveal=False, max_words=3, upper=True, pop=114, anim="pop",
-    ),
-    "word_by_word": dict(
-        label="Word by Word", desc="Clean Inter white type rising smoothly word by word",
-        font="Inter", size=82, char_w=0.64, text=WHITE, active=_rgb("E4E4E7"),
-        outline=BLACK, border=3, shadow=3, back=_rgb("000000", 0x60),
-        glow=dict(color="FFFFFF", strength=35, blur=12),
-        mode="highlight", reveal=True, max_words=4, upper=False, pop=105, anim="word-by-word",
-    ),
-    "word_staircase": dict(
-        label="Word Staircase", desc="Condensed Oswald caps climbing out of soft blur",
-        font="Oswald", size=96, char_w=0.52, text=WHITE, active=_rgb("C4FF00"),
-        outline=BLACK, border=5, shadow=3, back=BLACK,
-        glow=dict(color="8ABE4C", strength=55, blur=18),
-        mode="highlight", reveal=True, max_words=3, upper=True, pop=108, anim="word-wave",
-    ),
-    "deep_pop": dict(
-        label="Deep Pop", desc="Montserrat Black with deep layered azure neon bloom",
-        font="Montserrat Black", size=88, char_w=0.80, text=WHITE, active=_rgb("60A5FA"),
-        outline=_rgb("0B1736"), border=5, shadow=2, back=BLACK,
-        glow=dict(color="456FFD", strength=80, blur=24),
-        mode="highlight", reveal=False, max_words=3, upper=True, pop=114, anim="focus-settle",
-    ),
-    "kinetic_hook": dict(
-        label="Kinetic Orange", desc="White & blazing orange type resolving out of blur",
-        font="Montserrat Black", size=86, char_w=0.80, text=WHITE, active=_rgb("FF6B00"),
-        outline=BLACK, border=5, shadow=3, back=BLACK,
-        glow=dict(color="FF6B00", strength=78, blur=26),
-        mode="highlight", reveal=False, max_words=3, upper=True, pop=110, anim="blur-in",
-    ),
     "afterglow": dict(
-        label="Afterglow", desc="Warm radiant yellow Archivo Black with soft golden bloom",
-        font="Archivo Black", size=84, char_w=0.78, text=_rgb("FAF830"), active=WHITE,
-        outline=_rgb("2A2000"), border=5, shadow=3, back=BLACK,
+        label="Afterglow", desc="Glowing yellow Archivo Black caps above white Caveat script",
+        font="Caveat", size=88, char_w=0.52, text=_rgb("FAF830"), active=WHITE,
+        outline=BLACK, border=4, shadow=4, back=BLACK,
         glow=dict(color="FAF830", strength=68, blur=24),
-        mode="chunk", max_words=3, upper=True, pop=110, anim="soft-rise",
+        row1_font="Archivo Black", row1_color=_rgb("FAF830"), row1_italic=False, row1_scale=104, row1_upper=True,
+        row2_color=WHITE, row2_italic=False, row2_upper=False, row2_scale=88,
+        mode="two_line", max_words=4, upper=False, pop=108, anim="soft-rise",
+    ),
+    "tokyo": dict(
+        label="Tokyo", desc="Tight bold lowercase Montserrat with glowing cobalt blue focus",
+        font="Montserrat ExtraBold", size=86, char_w=0.76, text=WHITE, active=_rgb("456FFD"),
+        outline=BLACK, border=5, shadow=5, back=_rgb("000000", 0x55),
+        glow=dict(color="456FFD", strength=68, blur=16),
+        mode="highlight", reveal=False, max_words=4, lower=True, pop=110, anim="word-by-word",
     ),
     "devin_jatho": dict(
-        label="Devin Jatho", desc="Heavy white lead over glowing crimson emphasis line",
-        font="Kanit Black", size=86, char_w=0.72, text=WHITE, active=_rgb("FF2424"),
-        outline=BLACK, border=5, shadow=3, back=BLACK,
+        label="Devin Jatho", desc="Heavy white italic Montserrat over glowing crimson red row",
+        font="Montserrat Black", size=86, char_w=0.80, text=WHITE, active=_rgb("FF0000"),
+        outline=BLACK, border=5, shadow=4, back=BLACK,
         glow=dict(color="FF0000", strength=76, blur=20),
+        row1_font="Montserrat Black", row1_color=WHITE, row1_italic=True, row1_scale=92, row1_upper=True,
+        row2_italic=True, row2_upper=True, row2_scale=112,
         mode="two_line", max_words=4, upper=True, pop=110, anim="drift-right",
     ),
-    "soft_focus": dict(
-        label="Soft Focus", desc="Unspoken words stay blurred and snap crisp on timestamp",
-        font="Inter", size=80, char_w=0.64, text=WHITE, active=WHITE,
-        outline=BLACK, border=3, shadow=2, back=BLACK,
-        glow=dict(color="FFFFFF", strength=30, blur=10),
-        upcoming_blur=10, upcoming_alpha=0x88,
-        mode="highlight", reveal=False, max_words=4, upper=False, pop=104, anim="blur-in",
-    ),
-    "postcard": dict(
-        label="Postcard", desc="Dark serif on clean white pill card, active highlight",
-        font="Playfair Display", size=72, char_w=0.68, text=_rgb("18181B"), active=_rgb("4F46E5"),
-        outline=_rgb("FFFFFF", 0x05), border=16, shadow=0, back=WHITE, border_style=3,
-        mode="highlight", reveal=False, max_words=3, upper=False, pop=100, anim="soft-rise",
-    ),
-    "neon_splash": dict(
-        label="Neon Splash", desc="White 3-word splash with intense lime halo",
-        font="Montserrat Black", size=90, char_w=0.80, text=WHITE, active=_rgb("A0D83E"),
-        outline=BLACK, border=5, shadow=2, back=BLACK,
-        glow=dict(color="A0D83E", strength=82, blur=24),
-        mode="highlight", reveal=False, max_words=3, upper=True, pop=114, anim="focus-settle",
-    ),
-    "gold_sweep": dict(
-        label="Gold Sweep", desc="Tall Anton caps with rich gold fill & amber halo",
-        font="Anton", size=112, char_w=0.54, text=_rgb("FFDE00"), active=WHITE,
-        outline=BLACK, border=6, shadow=5, back=BLACK,
-        glow=dict(color="FFA318", strength=70, blur=20),
-        mode="chunk", max_words=3, upper=True, pop=114, anim="pop",
+    "tech_bro": dict(
+        label="Tech Bro", desc="Crisp white Montserrat over massive tall yellow Anton word",
+        font="Anton", size=90, char_w=0.54, text=WHITE, active=_rgb("FFCD00"),
+        outline=BLACK, border=5, shadow=4, back=BLACK,
+        glow=dict(color="FFCD00", strength=38, blur=14),
+        row1_font="Montserrat", row1_color=WHITE, row1_italic=False, row1_scale=68, row1_upper=True,
+        row2_color=_rgb("FFCD00"), row2_italic=False, row2_upper=True, row2_scale=145,
+        mode="two_line", max_words=4, upper=True, pop=110, anim="soft-rise",
     ),
 }
 
 STYLE_ALIASES = {
     "lime": "neon",
     "pill": "boxed",
-    "glow": "neon_splash",
+    "glow": "aura_glow",
     "creator": "bouncy_trendy",
     "kalakarglow": "aura_glow",
-    "cleanmotion": "word_by_word",
     "mumbai": "afterglow",
-    "classicinsta": "postcard",
-    "softfocus": "soft_focus",
-    "kinetichook": "kinetic_hook",
     "taha-create": "devin_jatho",
-    "goldsweep": "gold_sweep",
+    "spanish": "portugal",
+    "businessman": "business",
+    "word-punch": "attention",
+    "trading-bro": "trading_bro",
+    "choreo": "crazy",
+    "real-shamani": "real_shamani",
+    "kalakar-beam-2": "tech_bro",
+    # Previous aliases mapped cleanly
+    "word_by_word": "portugal",
+    "word_staircase": "crazy",
+    "deep_pop": "tokyo",
+    "kinetic_hook": "attention",
+    "soft_focus": "portugal",
+    "postcard": "boxed",
+    "neon_splash": "aura_glow",
+    "gold_sweep": "tech_bro",
 }
 
 VALID_ANIMATIONS = {
@@ -437,7 +464,11 @@ async def generate_captions(
 
     def fmt(word: str) -> str:
         t = _escape_ass_text(word)
-        return t.upper() if st.get("upper") else t
+        if st.get("upper"):
+            return t.upper()
+        if st.get("lower"):
+            return t.lower()
+        return t
 
     if st["mode"] == "karaoke":
         primary, secondary = st["active"], st["text"]
@@ -545,14 +576,25 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             emit_with_glow(ev_s, ev_e, ent, " ".join(parts))
             continue
 
-        # Two-line stacked mode (e.g. Bouncy Trendy / Devin Jatho) when block has >= 2 words
+        # Two-line stacked mode (Bouncy Trendy, Devin Jatho, Attention, Afterglow, Tech Bro)
         if st["mode"] == "two_line" and len(block) >= 2:
             split_at = max(1, len(block) // 2)
             row1_indices = range(0, split_at)
             row2_indices = range(split_at, len(block))
             r1_font = st.get("row1_font")
-            r1_italic = "\\i1" if st.get("row1_italic") else ""
+            r1_italic = "\\i1" if st.get("row1_italic") else ("\\i0" if st.get("row2_italic") else "")
             r1_scale = int(fs * (st.get("row1_scale", 85) / 100.0))
+            r1_color = st.get("row1_color", st["text"])
+            r2_italic = "\\i1" if st.get("row2_italic") else ""
+            r2_scale = int(fs * (st.get("row2_scale", 108) / 100.0))
+            r2_base_color = st.get("row2_color", st.get("active", st["text"]))
+
+            def row_fmt(word: str, is_row2: bool) -> str:
+                t = _escape_ass_text(word)
+                upper_flag = st.get("row2_upper", st.get("upper")) if is_row2 else st.get("row1_upper", st.get("upper"))
+                return t.upper() if upper_flag else t
+
+            r_texts = [row_fmt(w.word, idx >= split_at) for idx, w in enumerate(block)]
 
             for i, w in enumerate(block):
                 ev_s = block[0].start if i == 0 else w.start
@@ -560,31 +602,69 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 ent = _build_entrance_tags(anim_mode, W // 2, cy, pop, i == 0) + line_tags
 
                 def render_word(j: int, is_row2: bool) -> str:
-                    fn = _font_override(texts[j], int(fs * 1.12))
-                    if not fn and not is_row2 and r1_font:
-                        fn = f"\\fn{r1_font}\\fs{r1_scale}{r1_italic}"
+                    fn = _font_override(r_texts[j], int(fs * 1.12))
+                    if not fn and not is_row2:
+                        base_fn = f"\\fn{r1_font}" if r1_font else ""
+                        fn = f"{base_fn}\\fs{r1_scale}{r1_italic}"
                     elif not fn and is_row2:
-                        fn = f"\\fs{int(fs * 1.08)}"
+                        fn = f"\\fs{r2_scale}{r2_italic}"
 
                     if j == i:
-                        col = f"\\c{st['active']}" if st.get("active") else ""
+                        col = f"\\c{st['active']}" if st.get("active") else (f"\\c{r2_base_color}" if is_row2 else f"\\c{r1_color}")
                         anim = ""
                         if anim_mode == "pop" and pop != 100:
                             anim = (
                                 f"\\fscx92\\fscy92\\t(0,100,\\fscx{pop}\\fscy{pop})"
                                 f"\\t(100,180,\\fscx{100 + (pop - 100) // 2}\\fscy{100 + (pop - 100) // 2})"
                             )
-                        return f"{{{fn}{col}{anim}}}{texts[j]}{reset}"
+                        return f"{{{fn}{col}{anim}}}{r_texts[j]}{reset}"
                     elif is_row2:
-                        col = f"\\c{st['active']}" if st.get("active") else ""
-                        return f"{{{fn}{col}}}{texts[j]}{reset}"
+                        col = f"\\c{r2_base_color}" if r2_base_color else ""
+                        return f"{{{fn}{col}}}{r_texts[j]}{reset}"
                     else:
-                        return f"{{{fn}}}{texts[j]}{reset}" if fn else texts[j]
+                        col = f"\\c{r1_color}" if r1_color != st["text"] else ""
+                        return f"{{{fn}{col}}}{r_texts[j]}{reset}" if (fn or col) else r_texts[j]
 
                 row1_str = " ".join(render_word(j, False) for j in row1_indices)
                 row2_str = " ".join(render_word(j, True) for j in row2_indices)
                 emit_with_glow(ev_s, ev_e, ent, f"{row1_str}\\N{row2_str}")
             continue
+
+        # Splash Hero composition (Business, Trading Bro, Aura Glow): big hero active word + small white supports
+        if st["mode"] == "splash_hero":
+            hero_font = st.get("hero_font", st["font"])
+            hero_fs = int(fs * st.get("hero_scale", 1.5))
+            support_fs = max(18, int(fs * 0.72))
+            for i, w in enumerate(block):
+                ev_s = block[0].start if i == 0 else w.start
+                ev_e = word_end(i)
+                ent = _build_entrance_tags(anim_mode, W // 2, cy, pop, i == 0) + line_tags
+                row_parts = []
+                for j, _w in enumerate(block):
+                    txt = _escape_ass_text(_w.word)
+                    fn = _font_override(txt, int(fs * 1.12))
+                    if j == i:
+                        if st.get("hero_upper"):
+                            txt = txt.upper()
+                        elif st.get("hero_lower"):
+                            txt = txt.lower()
+                        hfn = fn or f"\\fn{hero_font}\\fs{hero_fs}"
+                        col = f"\\c{st['active']}" if st.get("active") else ""
+                        anim = ""
+                        if anim_mode == "pop" or pop > 100:
+                            anim = (
+                                f"\\fscx90\\fscy90\\t(0,100,\\fscx{pop}\\fscy{pop})"
+                                f"\\t(100,180,\\fscx100\\fscy100)"
+                            )
+                        row_parts.append(f"{{{hfn}{col}{anim}}}{txt}{reset}")
+                    else:
+                        sfn = fn or f"\\fs{support_fs}"
+                        row_parts.append(f"{{{sfn}\\c{st['text']}}}{txt}{reset}")
+                emit_with_glow(ev_s, ev_e, ent, "\\N".join(row_parts))
+            continue
+
+        active_palette = st.get("active_palette") or []
+        emphasis_face = st.get("emphasis_face")
 
         for i, w in enumerate(block):
             ev_s = block[0].start if i == 0 else w.start
@@ -610,7 +690,21 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             for j, other in enumerate(block):
                 fn = _font_override(texts[j], int(fs * 1.12))
                 if j == i:
-                    color = f"\\c{st['active']}" if st.get("active") and st["active"] != st["text"] else ""
+                    if active_palette:
+                        act_col = active_palette[word_counter % len(active_palette)]
+                        color = f"\\c{act_col}"
+                    else:
+                        color = f"\\c{st['active']}" if st.get("active") and st["active"] != st["text"] else ""
+                    w_txt = texts[j]
+                    face_tags = ""
+                    if emphasis_face and not fn:
+                        ef_font = emphasis_face.get("font")
+                        ef_scale = int(fs * emphasis_face.get("scale", 1.2))
+                        ef_it = "\\i1" if emphasis_face.get("italic") else ""
+                        if ef_font:
+                            face_tags = f"\\fn{ef_font}\\fs{ef_scale}{ef_it}"
+                        if emphasis_face.get("upper"):
+                            w_txt = w_txt.upper()
                     wob = f"\\frz{(-3 if i % 2 else 3)}" if st.get("wobble") else ""
                     anim = ""
                     if st.get("upcoming_blur"):
@@ -620,7 +714,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                             f"\\fscx92\\fscy92\\t(0,100,\\fscx{pop}\\fscy{pop})"
                             f"\\t(100,180,\\fscx{100 + (pop - 100) // 2}\\fscy{100 + (pop - 100) // 2})"
                         )
-                    parts.append(f"{{{fn}{color}{wob}{anim}}}{texts[j]}{reset}")
+                    parts.append(f"{{{fn}{face_tags}{color}{wob}{anim}}}{w_txt}{reset}")
                 elif st.get("reveal") and j > i:
                     parts.append(f"{{{fn}\\alpha&HFF&}}{texts[j]}{reset}")
                 elif st.get("upcoming_blur") and j > i:
@@ -631,6 +725,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                     parts.append(f"{{{fn}}}{texts[j]}{reset}" if fn else texts[j])
 
             emit_with_glow(ev_s, ev_e, ent, " ".join(parts))
+            word_counter += 1
 
     with open(output_path, "w", encoding="utf-8-sig") as f:
         f.write(header + "\n".join(lines) + "\n")

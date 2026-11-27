@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "TeXGyreHeros";
+  src: url("/fonts/TeXGyreHeros-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --background: #fcfcfd;
   --foreground: #101828;

@@ -109,11 +109,11 @@ CAPTION_FONT_OVERRIDE = os.getenv("CAPTION_FONT", "")
 CAPTION_FONT_WIDTHS = {
     "Arial Black": 0.80, "Impact": 0.56, "Segoe UI Black": 0.74, "Comic Sans MS": 0.68,
     "Bahnschrift": 0.62, "Franklin Gothic Medium": 0.60, "Verdana": 0.74, "Segoe UI": 0.62,
-    "Tahoma": 0.66, "Montserrat": 0.74, "Montserrat Black": 0.80, "Poppins": 0.70,
-    "Poppins ExtraBold": 0.75, "Kanit": 0.66, "Kanit Black": 0.72, "Oswald": 0.52,
+    "Tahoma": 0.66, "Montserrat": 0.74, "Montserrat ExtraBold": 0.78, "Montserrat Black": 0.80,
+    "Poppins": 0.70, "Poppins ExtraBold": 0.75, "Kanit": 0.66, "Kanit Black": 0.72, "Oswald": 0.52,
     "Bebas Neue": 0.48, "Anton": 0.54, "Inter": 0.64, "Inter Medium": 0.62,
     "Playfair Display": 0.68, "Archivo Black": 0.78, "Caveat": 0.52, "Bangers": 0.56,
-    "Plus Jakarta Sans ExtraBold": 0.72,
+    "Plus Jakarta Sans ExtraBold": 0.72, "TeXGyreHeros": 0.66,
 }
 # Fonts for non-Latin scripts (word-level override so English words keep the Latin font)
 CAPTION_SCRIPT_FONTS = {

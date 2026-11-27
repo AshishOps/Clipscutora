@@ -94,7 +94,12 @@ type StyleWord = {
   text: string;
   active?: boolean;
   upcoming?: boolean;
+  hero?: boolean;
   color?: string;
+  fontFamily?: string;
+  fontWeight?: number;
+  italic?: boolean;
+  scale?: number;
 };
 
 type CaptionStyleSpec = {
@@ -105,6 +110,7 @@ type CaptionStyleSpec = {
   fontWeight: number;
   italic?: boolean;
   upper: boolean;
+  lower?: boolean;
   fontSizePx: number;
   textColor: string;
   activeColor: string;
@@ -118,10 +124,10 @@ type CaptionStyleSpec = {
   boxRounded?: string;
   anim: string;
   popScale?: number;
-  mode: "single" | "highlight" | "chunk" | "karaoke" | "two_line" | "soft_focus";
+  mode: "single" | "highlight" | "chunk" | "karaoke" | "two_line" | "splash_hero";
   words: StyleWord[];
-  row1?: { text: string; fontFamily: string; fontWeight: number; italic?: boolean; color: string };
-  row2?: { text: string; fontFamily: string; fontWeight: number; italic?: boolean; color: string; glowColor?: string };
+  row1?: { text: string; fontFamily: string; fontWeight: number; italic?: boolean; upper?: boolean; color: string; glowColor?: string; scale?: number };
+  row2?: { text: string; fontFamily: string; fontWeight: number; italic?: boolean; upper?: boolean; color: string; glowColor?: string; activeWord?: string; activeColor?: string };
 };
 
 const STYLES: CaptionStyleSpec[] = [
@@ -292,10 +298,177 @@ const STYLES: CaptionStyleSpec[] = [
     mode: "highlight",
     words: [{ text: "Smooth" }, { text: "&" }, { text: "Minimal", active: true }],
   },
+
+  // ── Exact 12 Samsaam.io Creator Styles ────────────────────────────────────
+  {
+    id: "portugal",
+    label: "Portugal",
+    desc: "White Inter stack with red Playfair italic emphasis",
+    fontFamily: "'Inter', sans-serif",
+    fontWeight: 800,
+    upper: false,
+    fontSizePx: 14,
+    textColor: "#FFFFFF",
+    activeColor: "#FF0000",
+    outlineColor: "#000000",
+    strokePx: 2.5,
+    shadowOffsetPx: 1.5,
+    anim: "word-by-word",
+    popScale: 1.08,
+    mode: "highlight",
+    words: [
+      { text: "Stop" },
+      { text: "the" },
+      {
+        text: "excuses",
+        active: true,
+        color: "#FF0000",
+        fontFamily: "'Playfair Display', serif",
+        fontWeight: 900,
+        italic: true,
+        scale: 1.24,
+      },
+    ],
+  },
+  {
+    id: "business",
+    label: "Business",
+    desc: "Crisp white TeX Gyre Heros around huge lime-gold hero word",
+    fontFamily: "'TeXGyreHeros', 'Inter', sans-serif",
+    fontWeight: 700,
+    upper: false,
+    fontSizePx: 11,
+    textColor: "#FFFFFF",
+    activeColor: "#A8E34B",
+    outlineColor: "#000000",
+    strokePx: 2,
+    shadowOffsetPx: 1,
+    glowColor: "#A8E34B",
+    glowBlurPx: 10,
+    anim: "drift-right",
+    mode: "splash_hero",
+    words: [
+      { text: "Build your" },
+      { text: "BUSINESS", hero: true, active: true, color: "#A8E34B", fontFamily: "'TeXGyreHeros', 'Inter', sans-serif", fontWeight: 700, scale: 1.75 },
+      { text: "from anywhere" },
+    ],
+  },
+  {
+    id: "attention",
+    label: "Attention",
+    desc: "Small white Montserrat lead; blazing orange italic punchline",
+    fontFamily: "'Montserrat', sans-serif",
+    fontWeight: 800,
+    italic: true,
+    upper: true,
+    fontSizePx: 15,
+    textColor: "#FFFFFF",
+    activeColor: "#FF6D00",
+    outlineColor: "#000000",
+    strokePx: 3,
+    shadowOffsetPx: 2,
+    glowColor: "#FF1E00",
+    glowBlurPx: 14,
+    anim: "soft-rise",
+    mode: "two_line",
+    words: [],
+    row1: { text: "NOW PAY", fontFamily: "'Montserrat', sans-serif", fontWeight: 700, italic: false, upper: true, color: "#FFFFFF", scale: 0.72 },
+    row2: { text: "ATTENTION", fontFamily: "'Montserrat', sans-serif", fontWeight: 900, italic: true, upper: true, color: "#FF6D00", glowColor: "#FF1E00" },
+  },
+  {
+    id: "trading_bro",
+    label: "Trading Bro",
+    desc: "Small white Inter words under glowing red Poppins hero",
+    fontFamily: "'Inter', sans-serif",
+    fontWeight: 600,
+    upper: false,
+    fontSizePx: 11,
+    textColor: "#FFFFFF",
+    activeColor: "#E90000",
+    outlineColor: "#000000",
+    strokePx: 2.2,
+    shadowOffsetPx: 1.5,
+    glowColor: "#E90000",
+    glowBlurPx: 14,
+    anim: "word-by-word",
+    mode: "splash_hero",
+    words: [
+      { text: "Trading is not" },
+      { text: "trading", hero: true, active: true, color: "#E90000", fontFamily: "'Poppins', sans-serif", fontWeight: 800, scale: 1.65 },
+      { text: "for everyone" },
+    ],
+  },
+  {
+    id: "aura_glow",
+    label: "Aura Glow",
+    desc: "White Inter stack with glowing neon green centre word",
+    fontFamily: "'Inter', sans-serif",
+    fontWeight: 600,
+    upper: false,
+    fontSizePx: 11.5,
+    textColor: "#FFFFFF",
+    activeColor: "#16FF00",
+    outlineColor: "#000000",
+    strokePx: 2.5,
+    shadowOffsetPx: 1.5,
+    glowColor: "#16FF00",
+    glowBlurPx: 16,
+    anim: "drift-right",
+    mode: "splash_hero",
+    words: [
+      { text: "This is your" },
+      { text: "MOMENT", hero: true, active: true, color: "#16FF00", fontFamily: "'Montserrat', sans-serif", fontWeight: 900, scale: 1.5 },
+      { text: "to shine" },
+    ],
+  },
+  {
+    id: "crazy",
+    label: "Crazy",
+    desc: "Bold Plus Jakarta Sans stack with electric blue callouts",
+    fontFamily: "'Plus Jakarta Sans', sans-serif",
+    fontWeight: 800,
+    upper: false,
+    fontSizePx: 14,
+    textColor: "#FFFFFF",
+    activeColor: "#0064FF",
+    outlineColor: "#000000",
+    strokePx: 2.5,
+    shadowOffsetPx: 1.5,
+    glowColor: "#FFFFFF",
+    glowBlurPx: 10,
+    anim: "word-wave",
+    popScale: 1.1,
+    mode: "highlight",
+    words: [{ text: "Five" }, { text: "visual", active: true }, { text: "hooks" }],
+  },
+  {
+    id: "real_shamani",
+    label: "Real Shamani",
+    desc: "Uppercase Montserrat stack with neon colour-cycling words",
+    fontFamily: "'Montserrat', sans-serif",
+    fontWeight: 800,
+    upper: true,
+    fontSizePx: 13.5,
+    textColor: "#FFFFFF",
+    activeColor: "#22E55B",
+    outlineColor: "#000000",
+    strokePx: 3,
+    shadowOffsetPx: 2,
+    glowColor: "#FFFFFF",
+    glowBlurPx: 8,
+    anim: "word-wave",
+    popScale: 1.1,
+    mode: "highlight",
+    words: [
+      { text: "LIVE" },
+      { text: "WITHOUT", active: true, color: "#22E55B" },
+      { text: "REGRET", color: "#2F7BFF" },
+    ],
+  },
   {
     id: "bouncy_trendy",
     label: "Bouncy Trendy",
-    desc: "Italic white lead over lime glow punchline, bouncy drop",
+    desc: "Italic Inter white lead over glowing lime Kanit punchline",
     fontFamily: "'Kanit', sans-serif",
     fontWeight: 900,
     italic: true,
@@ -311,138 +484,62 @@ const STYLES: CaptionStyleSpec[] = [
     anim: "bounce-drop",
     mode: "two_line",
     words: [],
-    row1: { text: "WAIT FOR", fontFamily: "'Inter', sans-serif", fontWeight: 500, italic: true, color: "#ECECEC" },
-    row2: { text: "THIS DROP", fontFamily: "'Kanit', sans-serif", fontWeight: 900, italic: true, color: "#C4FF00", glowColor: "#C4FF00" },
-  },
-  {
-    id: "aura_glow",
-    label: "Aura Glow",
-    desc: "Crisp white stack with glowing electric green center word",
-    fontFamily: "'Montserrat', sans-serif",
-    fontWeight: 900,
-    upper: true,
-    fontSizePx: 14,
-    textColor: "#FFFFFF",
-    activeColor: "#16FF00",
-    outlineColor: "#000000",
-    strokePx: 3,
-    shadowOffsetPx: 2,
-    glowColor: "#16FF00",
-    glowBlurPx: 16,
-    anim: "pop",
-    popScale: 1.12,
-    mode: "highlight",
-    words: [{ text: "ZERO" }, { text: "LIMITS", active: true }, { text: "LEFT" }],
-  },
-  {
-    id: "word_by_word",
-    label: "Word by Word",
-    desc: "Clean Inter white type rising smoothly word by word",
-    fontFamily: "'Inter', sans-serif",
-    fontWeight: 700,
-    upper: false,
-    fontSizePx: 14,
-    textColor: "#FFFFFF",
-    activeColor: "#E4E4E7",
-    outlineColor: "#000000",
-    strokePx: 2,
-    shadowOffsetPx: 1.5,
-    glowColor: "#FFFFFF",
-    glowBlurPx: 8,
-    anim: "word-by-word",
-    mode: "highlight",
-    words: [{ text: "Keep" }, { text: "building" }, { text: "fast", active: true }],
-  },
-  {
-    id: "word_staircase",
-    label: "Word Staircase",
-    desc: "Condensed Oswald caps climbing out of soft blur",
-    fontFamily: "'Oswald', sans-serif",
-    fontWeight: 700,
-    upper: true,
-    fontSizePx: 17,
-    textColor: "#FFFFFF",
-    activeColor: "#C4FF00",
-    outlineColor: "#000000",
-    strokePx: 3,
-    shadowOffsetPx: 2,
-    glowColor: "#8ABE4C",
-    glowBlurPx: 12,
-    anim: "word-wave",
-    mode: "highlight",
-    words: [{ text: "STEP" }, { text: "BY", active: true }, { text: "STEP" }],
-  },
-  {
-    id: "deep_pop",
-    label: "Deep Pop",
-    desc: "Montserrat Black with deep layered azure neon bloom",
-    fontFamily: "'Montserrat', sans-serif",
-    fontWeight: 900,
-    upper: true,
-    fontSizePx: 14,
-    textColor: "#FFFFFF",
-    activeColor: "#60A5FA",
-    outlineColor: "#0B1736",
-    strokePx: 3.2,
-    shadowOffsetPx: 1.5,
-    glowColor: "#456FFD",
-    glowBlurPx: 16,
-    anim: "focus-settle",
-    popScale: 1.12,
-    mode: "highlight",
-    words: [{ text: "STAY" }, { text: "IN" }, { text: "FLOW", active: true }],
-  },
-  {
-    id: "kinetic_hook",
-    label: "Kinetic Orange",
-    desc: "White & blazing orange type resolving out of blur",
-    fontFamily: "'Montserrat', sans-serif",
-    fontWeight: 900,
-    upper: true,
-    fontSizePx: 14,
-    textColor: "#FFFFFF",
-    activeColor: "#FF6B00",
-    outlineColor: "#000000",
-    strokePx: 3,
-    shadowOffsetPx: 2,
-    glowColor: "#FF6B00",
-    glowBlurPx: 16,
-    anim: "blur-in",
-    popScale: 1.1,
-    mode: "highlight",
-    words: [{ text: "ACT" }, { text: "RIGHT", active: true }, { text: "NOW" }],
+    row1: { text: "ONE IDEA", fontFamily: "'Inter', sans-serif", fontWeight: 500, italic: true, upper: true, color: "#ECECEC", scale: 0.78 },
+    row2: { text: "TEN HOOKS", fontFamily: "'Kanit', sans-serif", fontWeight: 900, italic: true, upper: true, color: "#C4FF00", glowColor: "#C4FF00" },
   },
   {
     id: "afterglow",
     label: "Afterglow",
-    desc: "Warm radiant yellow Archivo Black with soft golden bloom",
+    desc: "Glowing yellow Archivo Black caps over white Caveat script",
     fontFamily: "'Archivo Black', sans-serif",
     fontWeight: 400,
     upper: true,
     fontSizePx: 14,
     textColor: "#FAF830",
     activeColor: "#FFFFFF",
-    outlineColor: "#2A2000",
-    strokePx: 3,
+    outlineColor: "#000000",
+    strokePx: 2.8,
     shadowOffsetPx: 2,
     glowColor: "#FAF830",
-    glowBlurPx: 16,
+    glowBlurPx: 15,
     anim: "soft-rise",
-    popScale: 1.08,
-    mode: "chunk",
-    words: [{ text: "PURE" }, { text: "GOLD", active: true }, { text: "AURA" }],
+    mode: "two_line",
+    words: [],
+    row1: { text: "BIG DREAMS WIN", fontFamily: "'Archivo Black', sans-serif", fontWeight: 400, italic: false, upper: true, color: "#FAF830", glowColor: "#FAF830", scale: 0.96 },
+    row2: { text: "make it happen", fontFamily: "'Caveat', cursive", fontWeight: 700, italic: false, upper: false, color: "#FFFFFF" },
+  },
+  {
+    id: "tokyo",
+    label: "Tokyo",
+    desc: "Tight bold lowercase Montserrat with cobalt blue focus",
+    fontFamily: "'Montserrat', sans-serif",
+    fontWeight: 800,
+    upper: false,
+    lower: true,
+    fontSizePx: 14,
+    textColor: "#FFFFFF",
+    activeColor: "#456FFD",
+    outlineColor: "#000000",
+    strokePx: 3,
+    shadowOffsetPx: 2.5,
+    glowColor: "#456FFD",
+    glowBlurPx: 12,
+    anim: "word-by-word",
+    popScale: 1.1,
+    mode: "highlight",
+    words: [{ text: "right" }, { text: "words", active: true }, { text: "win" }],
   },
   {
     id: "devin_jatho",
     label: "Devin Jatho",
-    desc: "Heavy white lead over glowing crimson emphasis line",
-    fontFamily: "'Kanit', sans-serif",
+    desc: "Heavy white italic Montserrat over glowing crimson red row",
+    fontFamily: "'Montserrat', sans-serif",
     fontWeight: 900,
     italic: true,
     upper: true,
     fontSizePx: 15,
     textColor: "#FFFFFF",
-    activeColor: "#FF2424",
+    activeColor: "#FF0000",
     outlineColor: "#000000",
     strokePx: 3,
     shadowOffsetPx: 2,
@@ -451,115 +548,53 @@ const STYLES: CaptionStyleSpec[] = [
     anim: "drift-right",
     mode: "two_line",
     words: [],
-    row1: { text: "DON'T MISS", fontFamily: "'Kanit', sans-serif", fontWeight: 900, italic: true, color: "#FFFFFF" },
-    row2: { text: "THIS ONE", fontFamily: "'Kanit', sans-serif", fontWeight: 900, italic: true, color: "#FF2424", glowColor: "#FF0000" },
+    row1: { text: "STOP DOING", fontFamily: "'Montserrat', sans-serif", fontWeight: 900, italic: true, upper: true, color: "#FFFFFF", glowColor: "#FFFFFF", scale: 0.9 },
+    row2: { text: "THIS NOW", fontFamily: "'Montserrat', sans-serif", fontWeight: 900, italic: true, upper: true, color: "#FF0000", glowColor: "#FF0000" },
   },
   {
-    id: "soft_focus",
-    label: "Soft Focus",
-    desc: "Unspoken words stay blurred and snap crisp on timestamp",
-    fontFamily: "'Inter', sans-serif",
-    fontWeight: 700,
-    upper: false,
-    fontSizePx: 13.5,
-    textColor: "#FFFFFF",
-    activeColor: "#FFFFFF",
-    outlineColor: "#000000",
-    strokePx: 2,
-    shadowOffsetPx: 1.5,
-    glowColor: "#FFFFFF",
-    glowBlurPx: 8,
-    anim: "blur-in",
-    mode: "soft_focus",
-    words: [
-      { text: "Watch" },
-      { text: "focus", active: true },
-      { text: "snap", upcoming: true },
-      { text: "in", upcoming: true },
-    ],
-  },
-  {
-    id: "postcard",
-    label: "Postcard",
-    desc: "Dark serif on clean white pill card, active highlight",
-    fontFamily: "'Playfair Display', serif",
-    fontWeight: 700,
-    upper: false,
-    fontSizePx: 13.5,
-    textColor: "#18181B",
-    activeColor: "#4F46E5",
-    outlineColor: "transparent",
-    strokePx: 0,
-    shadowOffsetPx: 0,
-    boxBg: "#FFFFFF",
-    boxRounded: "8px",
-    anim: "soft-rise",
-    mode: "highlight",
-    words: [{ text: "Clean" }, { text: "editorial", active: true }, { text: "vibe" }],
-  },
-  {
-    id: "neon_splash",
-    label: "Neon Splash",
-    desc: "White 3-word splash with intense lime halo",
-    fontFamily: "'Montserrat', sans-serif",
-    fontWeight: 900,
-    upper: true,
-    fontSizePx: 14,
-    textColor: "#FFFFFF",
-    activeColor: "#A0D83E",
-    outlineColor: "#000000",
-    strokePx: 3,
-    shadowOffsetPx: 1.5,
-    glowColor: "#A0D83E",
-    glowBlurPx: 16,
-    anim: "focus-settle",
-    popScale: 1.12,
-    mode: "highlight",
-    words: [{ text: "NEXT" }, { text: "LEVEL", active: true }, { text: "HYPE" }],
-  },
-  {
-    id: "gold_sweep",
-    label: "Gold Sweep",
-    desc: "Tall Anton caps with rich gold fill & amber halo",
+    id: "tech_bro",
+    label: "Tech Bro",
+    desc: "Crisp white Montserrat over massive tall yellow Anton word",
     fontFamily: "'Anton', sans-serif",
     fontWeight: 400,
     upper: true,
-    fontSizePx: 19,
-    textColor: "#FFDE00",
-    activeColor: "#FFFFFF",
+    fontSizePx: 20,
+    textColor: "#FFFFFF",
+    activeColor: "#FFCD00",
     outlineColor: "#000000",
-    strokePx: 3.5,
-    shadowOffsetPx: 2.5,
-    glowColor: "#FFA318",
-    glowBlurPx: 14,
-    anim: "pop",
-    popScale: 1.12,
-    mode: "chunk",
-    words: [{ text: "MILLION" }, { text: "DOLLAR", active: true }],
+    strokePx: 3,
+    shadowOffsetPx: 2,
+    glowColor: "#FFCD00",
+    glowBlurPx: 10,
+    anim: "soft-rise",
+    mode: "two_line",
+    words: [],
+    row1: { text: "HOW YOU EARN", fontFamily: "'Montserrat', sans-serif", fontWeight: 700, italic: false, upper: true, color: "#FFFFFF", scale: 0.52 },
+    row2: { text: "MONEY", fontFamily: "'Anton', sans-serif", fontWeight: 400, italic: false, upper: true, color: "#FFCD00", glowColor: "#FFCD00" },
   },
 ];
 
 const FONTS = [
   { id: "", label: "Style Default", css: "inherit" },
   { id: "Montserrat", label: "Montserrat Bold", css: "'Montserrat', sans-serif", weight: 700 },
+  { id: "Montserrat ExtraBold", label: "Montserrat ExtraBold", css: "'Montserrat', sans-serif", weight: 800 },
   { id: "Montserrat Black", label: "Montserrat Black", css: "'Montserrat', sans-serif", weight: 900 },
+  { id: "Inter", label: "Inter Bold", css: "'Inter', sans-serif", weight: 700 },
+  { id: "Inter Medium", label: "Inter Medium Italic", css: "'Inter', sans-serif", weight: 500, italic: true },
   { id: "Poppins", label: "Poppins Bold", css: "'Poppins', sans-serif", weight: 700 },
   { id: "Poppins ExtraBold", label: "Poppins ExtraBold", css: "'Poppins', sans-serif", weight: 800 },
-  { id: "Kanit", label: "Kanit Bold", css: "'Kanit', sans-serif", weight: 700 },
   { id: "Kanit Black", label: "Kanit Black Italic", css: "'Kanit', sans-serif", weight: 900, italic: true },
   { id: "Plus Jakarta Sans ExtraBold", label: "Plus Jakarta Sans", css: "'Plus Jakarta Sans', sans-serif", weight: 800 },
-  { id: "Inter", label: "Inter Bold", css: "'Inter', sans-serif", weight: 700 },
+  { id: "TeXGyreHeros", label: "TeX Gyre Heros", css: "'TeXGyreHeros', sans-serif", weight: 700 },
   { id: "Oswald", label: "Oswald Bold", css: "'Oswald', sans-serif", weight: 700 },
   { id: "Bebas Neue", label: "Bebas Neue", css: "'Bebas Neue', sans-serif", weight: 400 },
   { id: "Anton", label: "Anton", css: "'Anton', sans-serif", weight: 400 },
   { id: "Archivo Black", label: "Archivo Black", css: "'Archivo Black', sans-serif", weight: 400 },
-  { id: "Playfair Display", label: "Playfair Italic", css: "'Playfair Display', serif", weight: 700, italic: true },
+  { id: "Playfair Display", label: "Playfair Italic", css: "'Playfair Display', serif", weight: 900, italic: true },
   { id: "Caveat", label: "Caveat Script", css: "'Caveat', cursive", weight: 700 },
-  { id: "Bangers", label: "Bangers Comic", css: "'Bangers', cursive", weight: 400 },
   { id: "Arial Black", label: "Arial Black", css: "'Arial Black', sans-serif", weight: 900 },
   { id: "Impact", label: "Impact", css: "Impact, sans-serif", weight: 400 },
   { id: "Segoe UI Black", label: "Segoe UI Black", css: "'Segoe UI Black', sans-serif", weight: 900 },
-  { id: "Verdana", label: "Verdana", css: "Verdana, sans-serif", weight: 700 },
 ];
 
 const GLOW_SCALE_MAP: Record<string, number> = {
@@ -570,23 +605,45 @@ const GLOW_SCALE_MAP: Record<string, number> = {
   intense: 1.5,
 };
 
+const REAL_SHAMANI_CYCLE = ["#22E55B", "#2F7BFF", "#FF4FB8", "#FF8A1F", "#F5F51A", "#19E3F0", "#FF2A2A"];
+
 function CaptionStylePreview({
   spec,
   overrideFont,
   overrideAnimation,
   overrideGlow,
+  interactive = false,
 }: {
   spec: CaptionStyleSpec;
   overrideFont: string;
   overrideAnimation: string;
   overrideGlow: string;
+  interactive?: boolean;
 }) {
+  const [stepIdx, setStepIdx] = useState(0);
+  useEffect(() => {
+    if (!interactive) return;
+    setStepIdx(0);
+    const id = setInterval(() => {
+      setStepIdx((n) => (n + 1) % 6);
+    }, 680);
+    return () => clearInterval(id);
+  }, [interactive, spec.id]);
+
   const chosenFont = overrideFont ? FONTS.find((f) => f.id === overrideFont) : undefined;
   const effectiveFont = chosenFont?.css && chosenFont.css !== "inherit" ? chosenFont.css : spec.fontFamily;
   const effectiveWeight = chosenFont?.weight ?? spec.fontWeight;
   const effectiveItalic = chosenFont?.italic ?? spec.italic;
   const effectiveAnim = overrideAnimation === "auto" ? spec.anim : overrideAnimation;
   const glowMult = GLOW_SCALE_MAP[overrideGlow] ?? 1;
+  const sizeScale = interactive ? 1.45 : 1;
+
+  // Compute fallback glow color if user forces glow on a non-glow preset (matches backend caption.py)
+  const fallbackGlow =
+    !spec.glowColor && overrideGlow !== "auto" && overrideGlow !== "off"
+      ? spec.activeColor
+      : spec.glowColor;
+  const fallbackBlur = spec.glowBlurPx ?? (fallbackGlow ? 12 : 0);
 
   const animClass =
     effectiveAnim === "none"
@@ -598,15 +655,15 @@ function CaptionStylePreview({
   const buildShadow = (glowHex?: string, blurPx?: number, isActive?: boolean) => {
     const parts: string[] = [];
     if (spec.shadowOffsetPx > 0) {
-      parts.push(`${spec.shadowOffsetPx}px ${spec.shadowOffsetPx}px 0px rgba(0,0,0,0.85)`);
+      parts.push(`${spec.shadowOffsetPx}px ${spec.shadowOffsetPx}px 0px rgba(0,0,0,0.88)`);
     }
-    if (!spec.glowColor && spec.strokePx === 0 && spec.shadowOffsetPx > 0) {
+    if (!glowHex && spec.strokePx === 0 && spec.shadowOffsetPx > 0) {
       parts.push(`0 2px 8px rgba(0,0,0,0.75)`);
     }
     if (glowHex && blurPx && glowMult > 0) {
-      const r1 = Math.round(blurPx * 0.45 * glowMult);
-      const r2 = Math.round(blurPx * glowMult);
-      const r3 = Math.round(blurPx * 1.6 * glowMult);
+      const r1 = Math.round(blurPx * 0.45 * glowMult * sizeScale);
+      const r2 = Math.round(blurPx * glowMult * sizeScale);
+      const r3 = Math.round(blurPx * 1.6 * glowMult * sizeScale);
       parts.push(`0 0 ${r1}px ${glowHex}`);
       parts.push(`0 0 ${r2}px ${glowHex}`);
       if (isActive || glowMult >= 1.2) {
@@ -616,66 +673,134 @@ function CaptionStylePreview({
     return parts.length ? parts.join(", ") : undefined;
   };
 
-  const wordStyle = (w?: StyleWord, customGlow?: string): React.CSSProperties => ({
-    fontFamily: effectiveFont,
-    fontWeight: effectiveWeight,
-    fontStyle: effectiveItalic ? "italic" : "normal",
-    fontSize: `${spec.fontSizePx}px`,
-    lineHeight: 1.15,
-    color: w?.color || (w?.active ? spec.activeColor : spec.textColor),
-    WebkitTextStroke:
-      spec.strokePx > 0 && spec.outlineColor !== "transparent"
-        ? `${spec.strokePx}px ${spec.outlineColor}`
-        : undefined,
-    textShadow: buildShadow(customGlow ?? spec.glowColor, spec.glowBlurPx, w?.active),
-    transform: w?.active && spec.popScale && spec.popScale > 1 ? `scale(${spec.popScale})` : undefined,
-    opacity: w?.upcoming ? 0.48 : 1,
-    filter: w?.upcoming ? "blur(2.2px)" : undefined,
-    display: "inline-block",
-  });
+  // For interactive preview, rotate which word is currently spoken/highlighted
+  const activeWordPos = interactive && spec.words.length > 0 ? stepIdx % spec.words.length : -1;
+
+  const wordStyle = (w?: StyleWord, customGlow?: string, isCurrentlySpoken?: boolean): React.CSSProperties => {
+    const active = interactive ? !!isCurrentlySpoken : !!w?.active;
+    const heroWord = interactive && spec.mode === "splash_hero" ? !!isCurrentlySpoken : !!w?.hero;
+    const cycleColor =
+      interactive && spec.id === "real_shamani" && active
+        ? REAL_SHAMANI_CYCLE[stepIdx % REAL_SHAMANI_CYCLE.length]
+        : interactive && spec.id === "beast"
+        ? REAL_SHAMANI_CYCLE[stepIdx % REAL_SHAMANI_CYCLE.length]
+        : undefined;
+    const portugalEmphasis = spec.id === "portugal" && active;
+    const baseColor =
+      cycleColor ||
+      (active ? spec.activeColor : spec.textColor);
+    const wFont =
+      chosenFont?.css && chosenFont.css !== "inherit"
+        ? chosenFont.css
+        : portugalEmphasis
+        ? "'Playfair Display', serif"
+        : heroWord || !interactive
+        ? w?.fontFamily || effectiveFont
+        : effectiveFont;
+    const wWeight =
+      chosenFont?.weight ??
+      (portugalEmphasis ? 900 : heroWord || !interactive ? w?.fontWeight ?? effectiveWeight : effectiveWeight);
+    const wItalic = chosenFont?.italic ?? (portugalEmphasis ? true : heroWord || !interactive ? w?.italic ?? effectiveItalic : effectiveItalic);
+    const wScale = portugalEmphasis ? 1.24 : heroWord ? w?.scale ?? 1.5 : !interactive ? w?.scale ?? 1 : 1;
+    const fs = Math.round(spec.fontSizePx * wScale * sizeScale);
+
+    return {
+      fontFamily: wFont,
+      fontWeight: wWeight,
+      fontStyle: wItalic ? "italic" : "normal",
+      fontSize: `${fs}px`,
+      lineHeight: 1.05,
+      color: !interactive && w?.color ? w.color : baseColor,
+      WebkitTextStroke:
+        spec.strokePx > 0 && spec.outlineColor !== "transparent"
+          ? `${spec.strokePx * (interactive ? 1.15 : 1)}px ${spec.outlineColor}`
+          : undefined,
+      textShadow: buildShadow(
+        customGlow ?? (heroWord || active ? fallbackGlow : undefined),
+        fallbackBlur,
+        active || heroWord
+      ),
+      transform: active && !heroWord && spec.popScale && spec.popScale > 1 ? `scale(${spec.popScale})` : undefined,
+      opacity: w?.upcoming ? 0.48 : 1,
+      filter: w?.upcoming ? "blur(2.2px)" : undefined,
+      display: "inline-block",
+      transition: interactive ? "transform 120ms ease, color 120ms ease" : undefined,
+    };
+  };
 
   return (
-    <div className="relative h-[74px] w-full rounded-xl bg-gradient-to-b from-zinc-900 via-[#0d0e13] to-black border border-zinc-800/80 px-2.5 flex items-center justify-center overflow-hidden select-none">
-      {/* Subtle 9:16 video vignette & ambient light behind captions */}
+    <div
+      className={`relative w-full rounded-xl bg-gradient-to-b from-zinc-900 via-[#0d0e13] to-black border border-zinc-800/80 px-3 flex items-center justify-center overflow-hidden select-none ${
+        interactive ? "h-[116px]" : "h-[78px]"
+      }`}
+    >
       <div
-        className="pointer-events-none absolute inset-0 opacity-40"
+        className="pointer-events-none absolute inset-0 opacity-45"
         style={{
-          background: spec.glowColor && glowMult > 0
-            ? `radial-gradient(circle at 50% 55%, ${spec.glowColor}26 0%, transparent 70%)`
+          background: fallbackGlow && glowMult > 0
+            ? `radial-gradient(circle at 50% 55%, ${fallbackGlow}2b 0%, transparent 70%)`
             : "radial-gradient(circle at 50% 55%, rgba(255,255,255,0.06) 0%, transparent 70%)",
         }}
       />
 
       {spec.mode === "two_line" && spec.row1 && spec.row2 ? (
-        <div className="relative z-10 flex flex-col items-center justify-center leading-none gap-0.5 text-center">
+        <div
+          key={interactive ? `${spec.id}-${Math.floor(stepIdx / 3)}` : spec.id}
+          className="relative z-10 flex flex-col items-center justify-center leading-none gap-0.5 text-center"
+        >
           <span
-            className="caption-stroke tracking-tight"
+            className={`caption-stroke tracking-tight ${spec.row1.upper ? "uppercase" : ""}`}
             style={{
               fontFamily: chosenFont?.css && chosenFont.css !== "inherit" ? chosenFont.css : spec.row1.fontFamily,
               fontWeight: spec.row1.fontWeight,
               fontStyle: spec.row1.italic ? "italic" : "normal",
-              fontSize: "11px",
+              fontSize: `${Math.round(spec.fontSizePx * (spec.row1.scale ?? 0.85) * sizeScale)}px`,
               color: spec.row1.color,
-              WebkitTextStroke: `${Math.max(2, spec.strokePx - 0.5)}px ${spec.outlineColor}`,
-              textShadow: "0 2px 4px rgba(0,0,0,0.8)",
+              WebkitTextStroke: `${Math.max(1.8, spec.strokePx - 0.8)}px ${spec.outlineColor}`,
+              textShadow: buildShadow(spec.row1.glowColor, fallbackBlur ? fallbackBlur * 0.75 : undefined, false),
             }}
           >
             {spec.row1.text}
           </span>
           <span
-            className={`caption-stroke tracking-wide ${animClass}`}
+            className={`caption-stroke tracking-wide ${spec.row2.upper ? "uppercase" : ""} ${animClass}`}
             style={{
               fontFamily: chosenFont?.css && chosenFont.css !== "inherit" ? chosenFont.css : spec.row2.fontFamily,
               fontWeight: spec.row2.fontWeight,
               fontStyle: spec.row2.italic ? "italic" : "normal",
-              fontSize: `${spec.fontSizePx}px`,
+              fontSize: `${Math.round(spec.fontSizePx * sizeScale)}px`,
+              lineHeight: 0.98,
               color: spec.row2.color,
-              WebkitTextStroke: `${spec.strokePx}px ${spec.outlineColor}`,
-              textShadow: buildShadow(spec.row2.glowColor, spec.glowBlurPx, true),
+              WebkitTextStroke: `${spec.strokePx * (interactive ? 1.15 : 1)}px ${spec.outlineColor}`,
+              textShadow: buildShadow(spec.row2.glowColor ?? fallbackGlow, fallbackBlur, true),
             }}
           >
             {spec.row2.text}
           </span>
+        </div>
+      ) : spec.mode === "splash_hero" ? (
+        <div className="relative z-10 flex flex-col items-center justify-center leading-none text-center">
+          {spec.words.map((w, idx) => {
+            const isHero = interactive ? idx === activeWordPos : !!w.hero;
+            return (
+              <span
+                key={idx}
+                className={`caption-stroke ${isHero ? animClass : ""}`}
+                style={{
+                  ...wordStyle(w, isHero ? fallbackGlow : undefined, isHero),
+                  textTransform: isHero && (spec.id === "business" || spec.id === "aura_glow")
+                    ? "uppercase"
+                    : isHero && spec.id === "trading_bro"
+                    ? "lowercase"
+                    : undefined,
+                  marginTop: idx > 0 ? (isHero ? "-1px" : "-2px") : undefined,
+                  zIndex: isHero ? 2 : 1,
+                }}
+              >
+                {w.text}
+              </span>
+            );
+          })}
         </div>
       ) : spec.mode === "karaoke" ? (
         <div
@@ -685,19 +810,17 @@ function CaptionStylePreview({
             const phrase = spec.words.map((x) => x.text).join(" ");
             return i === 0 ? (
               <span key={i} className="relative inline-block">
-                {/* Base white text with crisp black outline */}
                 <span className="caption-stroke" style={wordStyle({ text: phrase })}>
                   {phrase}
                 </span>
-                {/* Animated orange progressive fill */}
                 <span
                   aria-hidden
                   className="anim-cap-karaoke pointer-events-none absolute inset-0 text-transparent"
                   style={{
                     fontFamily: effectiveFont,
                     fontWeight: effectiveWeight,
-                    fontSize: `${spec.fontSizePx}px`,
-                    lineHeight: 1.15,
+                    fontSize: `${Math.round(spec.fontSizePx * sizeScale)}px`,
+                    lineHeight: 1.05,
                   }}
                 >
                   {phrase}
@@ -708,32 +831,35 @@ function CaptionStylePreview({
         </div>
       ) : (
         <div
-          className={`relative z-10 flex items-center justify-center flex-wrap gap-x-1.5 ${
-            spec.upper ? "uppercase" : ""
+          className={`relative z-10 flex items-center justify-center flex-wrap gap-x-2 ${
+            spec.upper ? "uppercase" : spec.lower ? "lowercase" : ""
           }`}
           style={{
             backgroundColor: spec.boxBg,
             borderRadius: spec.boxRounded,
-            padding: spec.boxBg ? "4px 10px" : undefined,
+            padding: spec.boxBg ? "5px 12px" : undefined,
             boxShadow: spec.boxBg === "#FFFFFF" ? "0 4px 14px rgba(0,0,0,0.45)" : undefined,
             transform: spec.tiltDeg ? `rotate(${spec.tiltDeg}deg)` : undefined,
           }}
         >
-          {spec.words.map((w, idx) => (
-            <span
-              key={idx}
-              className={`caption-stroke ${w.active || effectiveAnim === "word-wave" || effectiveAnim === "word-by-word" ? animClass : ""}`}
-              style={{
-                ...wordStyle(w),
-                animationDelay:
-                  effectiveAnim === "word-wave" || effectiveAnim === "word-by-word"
-                    ? `${idx * 160}ms`
-                    : undefined,
-              }}
-            >
-              {w.text}
-            </span>
-          ))}
+          {spec.words.map((w, idx) => {
+            const isSpoken = interactive ? idx === activeWordPos : !!w.active;
+            return (
+              <span
+                key={idx}
+                className={`caption-stroke ${isSpoken || effectiveAnim === "word-wave" || effectiveAnim === "word-by-word" ? animClass : ""}`}
+                style={{
+                  ...wordStyle(w, isSpoken ? fallbackGlow : undefined, isSpoken),
+                  animationDelay:
+                    effectiveAnim === "word-wave" || effectiveAnim === "word-by-word"
+                      ? `${idx * 160}ms`
+                      : undefined,
+                }}
+              >
+                {w.text}
+              </span>
+            );
+          })}
         </div>
       )}
     </div>
@@ -1299,13 +1425,67 @@ export default function HomePage() {
 
             {captions && (
               <>
-                {/* Styles Grid with SelectionCards */}
+                {/* Live Selected Style Preview Stage */}
+                {(() => {
+                  const selectedSpec = STYLES.find((x) => x.id === captionPreset) ?? STYLES[0];
+                  const resolvedAnim = captionAnimation === "auto" ? selectedSpec.anim : captionAnimation;
+                  return (
+                    <div className="p-4 rounded-2xl bg-gray-50/70 dark:bg-zinc-950/60 border border-gray-200 dark:border-zinc-800/80 space-y-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <Badge color="brand">Live Stage Preview</Badge>
+                          <span className="text-xs font-semibold text-gray-900 dark:text-zinc-100">
+                            {selectedSpec.label}
+                          </span>
+                        </div>
+                        <span className="text-[11px] text-gray-500 dark:text-zinc-400">
+                          Font: {font || "Paired Default"} · Anim: {resolvedAnim} · Glow: {captionGlow}
+                        </span>
+                      </div>
+                      <CaptionStylePreview
+                        spec={selectedSpec}
+                        overrideFont={font}
+                        overrideAnimation={captionAnimation}
+                        overrideGlow={captionGlow}
+                        interactive
+                      />
+                    </div>
+                  );
+                })()}
+
+                {/* 12 Samsaam Creator Styles */}
                 <div className="space-y-2.5">
                   <label className="text-xs font-semibold text-gray-800 dark:text-zinc-300 tracking-wide block">
-                    Subtitle Style Template ({STYLES.length} Presets)
+                    Creator Styles — Samsaam Collection (12 Presets)
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {STYLES.map((s) => (
+                    {STYLES.slice(9).map((s) => (
+                      <SelectionCard
+                        key={s.id}
+                        title={s.label}
+                        description={s.desc}
+                        selected={captionPreset === s.id}
+                        onClick={() => setCaptionPreset(s.id)}
+                        preview={
+                          <CaptionStylePreview
+                            spec={s}
+                            overrideFont={font}
+                            overrideAnimation={captionAnimation}
+                            overrideGlow={captionGlow}
+                          />
+                        }
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* 9 Classic Styles */}
+                <div className="space-y-2.5">
+                  <label className="text-xs font-semibold text-gray-800 dark:text-zinc-300 tracking-wide block">
+                    Classic Viral Styles (9 Presets)
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {STYLES.slice(0, 9).map((s) => (
                       <SelectionCard
                         key={s.id}
                         title={s.label}
