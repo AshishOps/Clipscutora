@@ -20,10 +20,16 @@ export async function GET(req: NextRequest) {
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data.clips)) {
-        data.clips = data.clips.map((c: any) => ({
-          ...c,
-          url: c.url || `/api/video?jobId=${jobId}&filename=${encodeURIComponent(c.filename)}`,
-        }));
+        data.clips = data.clips.map((c: any) => {
+          const fname = c.filename || (typeof c.url === "string" ? c.url.split("/").pop() : "");
+          const isRemoteHttp = typeof c.url === "string" && /^https?:\/\//i.test(c.url);
+          return {
+            ...c,
+            url: isRemoteHttp
+              ? c.url
+              : `/api/video?jobId=${encodeURIComponent(jobId)}&filename=${encodeURIComponent(fname)}`,
+          };
+        });
       }
       return NextResponse.json(data);
     }

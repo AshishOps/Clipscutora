@@ -262,6 +262,10 @@ export default function JobStatusPage() {
             {clips.map((clip) => {
               const scoreBadgeVariant =
                 clip.score >= 80 ? "success" : clip.score >= 60 ? "amber" : "rose";
+              const clipSrc =
+                clip.url && /^https?:\/\//i.test(clip.url)
+                  ? clip.url
+                  : `/api/video?jobId=${encodeURIComponent(jobId)}&filename=${encodeURIComponent(clip.filename || clip.url?.split("/").pop() || "")}`;
 
               return (
                 <Card
@@ -271,7 +275,7 @@ export default function JobStatusPage() {
                   {/* 9:16 Video Player Container */}
                   <div className="relative aspect-[9/16] bg-[#07080a] flex items-center justify-center border-b border-[#dae7ff] dark:border-[#2a2d33]">
                     <video
-                      src={clip.url || clip.path}
+                      src={clipSrc}
                       controls
                       className="w-full h-full object-cover"
                       playsInline
@@ -325,7 +329,7 @@ export default function JobStatusPage() {
                     {/* Download Action Button */}
                     <div className="pt-3 border-t border-[#eef4ff] dark:border-[#2a2d33]">
                       <a
-                        href={clip.url || clip.path}
+                        href={clipSrc}
                         download={`${clip.filename || `clip_${clip.id}.mp4`}`}
                         className="w-full block"
                       >
