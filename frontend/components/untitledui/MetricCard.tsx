@@ -23,19 +23,21 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   return (
     <div
       className={cn(
-        "p-5 rounded-2xl bg-white dark:bg-zinc-900/60 border border-gray-200 dark:border-zinc-800/80 shadow-xs transition-all hover:border-gray-300 dark:hover:border-zinc-700/80 space-y-3",
+        "p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#141518] border border-[#dae7ff] dark:border-[#2a2d33] shadow-xs dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-all hover:border-[#b5d2ff] dark:hover:border-[#3b86ff]/40 space-y-2.5",
         className
       )}
     >
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-gray-500 dark:text-zinc-400">{label}</span>
-        {icon && <div className="text-gray-400 dark:text-zinc-500">{icon}</div>}
+        <span className="text-xs font-medium text-[#4d5b85] dark:text-[#9da4b0]">{label}</span>
+        {icon && <div className="text-[#3b86ff]">{icon}</div>}
       </div>
-      <div className="flex items-baseline justify-between gap-3">
-        <div className="text-2xl font-bold tracking-tight text-gray-900 dark:text-zinc-100 font-sans">{value}</div>
+      <div className="flex items-baseline justify-between gap-2">
+        <div className="text-xl sm:text-2xl font-bold tracking-tight text-[#0c1836] dark:text-[#f1f4f9]">
+          {value}
+        </div>
         {badge && <div>{badge}</div>}
       </div>
-      {hint && <p className="text-[11px] text-gray-500 dark:text-zinc-500 font-normal">{hint}</p>}
+      {hint && <p className="text-[11px] text-[#4d5b85] dark:text-[#9da4b0] font-normal">{hint}</p>}
     </div>
   );
 };

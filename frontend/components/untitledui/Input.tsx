@@ -43,14 +43,14 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-xs font-medium text-gray-700 dark:text-zinc-300 tracking-wide select-none"
+            className="block text-xs font-medium text-[#4d5b85] dark:text-[#9da4b0] tracking-wide select-none"
           >
             {label}
           </label>
         )}
         <div className="relative flex items-center">
           {leadingIcon && (
-            <div className="absolute left-3.5 flex items-center pointer-events-none text-gray-400 dark:text-zinc-500">
+            <div className="absolute left-3.5 flex items-center pointer-events-none text-[#6a748a] dark:text-[#9da4b0]">
               {leadingIcon}
             </div>
           )}
@@ -59,9 +59,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             disabled={disabled}
             className={cn(
-              "w-full bg-white dark:bg-zinc-950/70 border border-gray-300 dark:border-zinc-800 text-gray-900 dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-500 shadow-xs transition-all duration-150 outline-none",
-              "focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15",
-              "disabled:bg-gray-50 dark:disabled:bg-zinc-900/50 disabled:text-gray-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed",
+              "w-full bg-white dark:bg-[#1c1e22] border border-[#dae7ff] dark:border-[#2a2d33] text-[#0c1836] dark:text-[#f1f4f9] placeholder:text-[#6a748a] dark:placeholder:text-[#9da4b0]/75 shadow-xs transition-all duration-150 outline-none",
+              "focus:border-[#3b86ff] focus:ring-4 focus:ring-[#3b86ff]/20",
+              "disabled:bg-[#eef4ff] dark:disabled:bg-[#141518] disabled:text-[#6a748a] disabled:cursor-not-allowed",
               error && "border-rose-500 focus:border-rose-500 focus:ring-rose-500/15",
               leadingIcon ? "pl-10" : "pl-3.5",
               trailingIcon || trailingAction ? "pr-10" : "pr-3.5",
@@ -71,7 +71,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
           {trailingIcon && !trailingAction && (
-            <div className="absolute right-3.5 flex items-center pointer-events-none text-gray-400 dark:text-zinc-500">
+            <div className="absolute right-3.5 flex items-center pointer-events-none text-[#6a748a] dark:text-[#9da4b0]">
               {trailingIcon}
             </div>
           )}
@@ -81,7 +81,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             </div>
           )}
         </div>
-        {hint && !error && <p className="text-[11px] text-gray-500 dark:text-zinc-400">{hint}</p>}
+        {hint && !error && <p className="text-[11px] text-[#4d5b85] dark:text-[#9da4b0]">{hint}</p>}
         {error && <p className="text-[11px] text-rose-500 dark:text-rose-400 font-medium">{error}</p>}
       </div>
     );

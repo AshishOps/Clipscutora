@@ -30,21 +30,21 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const sizeClasses = {
-      sm: "px-3 py-1.5 text-xs font-semibold rounded-lg gap-1.5",
+      sm: "px-3.5 py-1.5 text-xs font-semibold rounded-full gap-1.5",
       md: "px-4 py-2 text-sm font-semibold rounded-xl gap-2",
-      lg: "px-4.5 py-2.5 text-sm font-semibold rounded-xl gap-2",
-      xl: "px-5 py-3 text-base font-semibold rounded-xl gap-2.5",
+      lg: "px-5 py-2.5 text-sm font-semibold rounded-xl gap-2",
+      xl: "px-6 py-3.5 text-base font-semibold rounded-full gap-2.5",
     }[size];
 
     const variantClasses = {
       primary:
-        "bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white shadow-xs border border-brand-500/30 focus:ring-4 focus:ring-brand-500/20 disabled:bg-brand-300 dark:disabled:bg-brand-900/50 disabled:text-white/70 dark:disabled:text-brand-300/50 disabled:border-transparent",
+        "btn-lit bg-[#3b86ff] hover:bg-[#5a9aff] active:bg-[#2563eb] text-white border border-white/15 focus:ring-4 focus:ring-[#3b86ff]/25 disabled:opacity-45 disabled:shadow-none",
       secondary:
-        "bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 shadow-xs focus:ring-4 focus:ring-brand-500/10 dark:bg-brand-950/60 dark:hover:bg-brand-900/60 dark:text-brand-300 dark:border-brand-800/60 disabled:opacity-50",
+        "bg-[#eef4ff] hover:bg-[#d6e6ff] text-[#2563eb] border border-[#b5d2ff] shadow-xs focus:ring-4 focus:ring-[#3b86ff]/15 dark:bg-[#111e3e]/70 dark:hover:bg-[#1e3a8a]/60 dark:text-[#85b5ff] dark:border-[#3b86ff]/30 disabled:opacity-50",
       "secondary-gray":
-        "bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 shadow-xs hover:border-gray-400 focus:ring-4 focus:ring-gray-200 dark:bg-zinc-900/80 dark:hover:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700/80 dark:hover:border-zinc-600 dark:focus:ring-zinc-700/20 disabled:opacity-40",
+        "bg-white hover:bg-[#eef4ff] text-[#0c1836] border border-[#dae7ff] shadow-xs hover:border-[#b5d2ff] focus:ring-4 focus:ring-[#3b86ff]/15 dark:bg-[#1c1e22] dark:hover:bg-[#24272c] dark:text-[#f1f4f9] dark:border-[#2a2d33] dark:hover:border-[#3b86ff]/40 disabled:opacity-40",
       tertiary:
-        "bg-transparent hover:bg-gray-100 text-gray-600 hover:text-gray-900 dark:hover:bg-zinc-800/60 dark:text-zinc-300 dark:hover:text-zinc-100 disabled:opacity-40",
+        "bg-transparent hover:bg-[#eef4ff] text-[#4d5b85] hover:text-[#0c1836] dark:hover:bg-[#1c1e22] dark:text-[#9da4b0] dark:hover:text-[#f1f4f9] disabled:opacity-40",
       destructive:
         "bg-error-600 hover:bg-error-700 active:bg-error-800 text-white shadow-xs focus:ring-4 focus:ring-error-500/20 disabled:opacity-50",
     }[variant];
@@ -67,7 +67,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ) : (
           leftIcon && <span className="flex-none">{leftIcon}</span>
         )}
-        <span>{children}</span>
+        <span className="relative z-10">{children}</span>
         {!isLoading && rightIcon && <span className="flex-none">{rightIcon}</span>}
       </button>
     );

@@ -26,7 +26,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         {label && (
           <label
             htmlFor={selectId}
-            className="block text-xs font-medium text-gray-700 dark:text-zinc-300 tracking-wide select-none"
+            className="block text-xs font-medium text-[#4d5b85] dark:text-[#9da4b0] tracking-wide select-none"
           >
             {label}
           </label>
@@ -36,9 +36,9 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             id={selectId}
             ref={ref}
             className={cn(
-              "w-full appearance-none bg-white dark:bg-zinc-950/70 border border-gray-300 dark:border-zinc-800 text-gray-900 dark:text-zinc-100 shadow-xs transition-all duration-150 outline-none cursor-pointer",
-              "focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15",
-              "disabled:bg-gray-50 dark:disabled:bg-zinc-900/50 disabled:text-gray-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed",
+              "w-full appearance-none bg-white dark:bg-[#1c1e22] border border-[#dae7ff] dark:border-[#2a2d33] text-[#0c1836] dark:text-[#f1f4f9] shadow-xs transition-all duration-150 outline-none cursor-pointer",
+              "focus:border-[#3b86ff] focus:ring-4 focus:ring-[#3b86ff]/20",
+              "disabled:bg-[#eef4ff] dark:disabled:bg-[#141518] disabled:text-[#6a748a] disabled:cursor-not-allowed",
               error && "border-rose-500 focus:border-rose-500 focus:ring-rose-500/15",
               sizeClasses,
               className
@@ -47,11 +47,11 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           >
             {children}
           </select>
-          <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 dark:text-zinc-400">
+          <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#4d5b85] dark:text-[#9da4b0]">
             <ChevronDown className="w-4 h-4 stroke-[2]" />
           </div>
         </div>
-        {hint && !error && <p className="text-[11px] text-gray-500 dark:text-zinc-400">{hint}</p>}
+        {hint && !error && <p className="text-[11px] text-[#4d5b85] dark:text-[#9da4b0]">{hint}</p>}
         {error && <p className="text-[11px] text-rose-500 dark:text-rose-400 font-medium">{error}</p>}
       </div>
     );

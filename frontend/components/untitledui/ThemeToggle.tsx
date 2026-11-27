@@ -28,7 +28,7 @@ export function ThemeToggle({ className }: { className?: string }) {
 
   if (!mounted) {
     return (
-      <div className="w-9 h-9 rounded-xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60" />
+      <div className="w-9 h-9 rounded-full border border-[#dae7ff] dark:border-[#2a2d33] bg-white dark:bg-[#141518]" />
     );
   }
 
@@ -39,17 +39,17 @@ export function ThemeToggle({ className }: { className?: string }) {
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       title={isDark ? "Switch to light mode" : "Switch to dark mode"}
       className={cn(
-        "relative w-9 h-9 rounded-xl border flex items-center justify-center transition-all duration-200 cursor-pointer outline-none select-none shadow-xs",
-        "border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-900",
-        "dark:border-zinc-800 dark:hover:border-zinc-700 dark:bg-zinc-900/60 dark:hover:bg-zinc-800 dark:text-zinc-300 dark:hover:text-zinc-100",
-        "focus:ring-4 focus:ring-brand-500/15",
+        "relative w-9 h-9 rounded-full border flex items-center justify-center transition-all duration-200 cursor-pointer outline-none select-none shadow-xs",
+        "border-[#dae7ff] hover:border-[#b5d2ff] bg-white hover:bg-[#eef4ff] text-[#4d5b85] hover:text-[#0c1836]",
+        "dark:border-[#2a2d33] dark:hover:border-[#3b86ff]/50 dark:bg-[#141518] dark:hover:bg-[#1c1e22] dark:text-[#9da4b0] dark:hover:text-white",
+        "focus:ring-4 focus:ring-[#3b86ff]/20",
         className
       )}
     >
       {isDark ? (
-        <Sun className="w-4 h-4 stroke-[2] transition-transform rotate-0 scale-100 text-amber-400" />
+        <Sun className="w-4 h-4 stroke-[2] text-amber-400" />
       ) : (
-        <Moon01 className="w-4 h-4 stroke-[2] transition-transform rotate-0 scale-100 text-brand-600" />
+        <Moon01 className="w-4 h-4 stroke-[2] text-[#3b86ff]" />
       )}
     </button>
   );

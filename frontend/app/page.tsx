@@ -75,7 +75,7 @@ function TimeInput({
         onChange={(e) => setText(e.target.value)}
         onBlur={commit}
         onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), commit())}
-        className="w-28 bg-white dark:bg-zinc-950/80 border border-gray-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-zinc-100 font-mono text-center focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 shadow-xs transition-all"
+        className="w-28 bg-white dark:bg-[#1c1e22] border border-[#dae7ff] dark:border-[#2a2d33] rounded-xl px-3 py-2 text-sm text-[#0c1836] dark:text-[#f1f4f9] font-mono text-center focus:outline-none focus:border-[#3b86ff] focus:ring-4 focus:ring-[#3b86ff]/20 shadow-xs transition-all"
       />
     </div>
   );
@@ -730,16 +730,16 @@ function CaptionStylePreview({
 
   return (
     <div
-      className={`relative w-full rounded-xl bg-gradient-to-b from-zinc-900 via-[#0d0e13] to-black border border-zinc-800/80 px-3 flex items-center justify-center overflow-hidden select-none ${
-        interactive ? "h-[116px]" : "h-[78px]"
+      className={`relative w-full rounded-2xl border border-[#2d3139] px-3 flex items-center justify-center overflow-hidden select-none ${
+        interactive ? "samsaam-stage min-h-[190px]" : "bg-[#07080a] h-[82px]"
       }`}
     >
       <div
-        className="pointer-events-none absolute inset-0 opacity-45"
+        className="pointer-events-none absolute inset-0 opacity-50"
         style={{
           background: fallbackGlow && glowMult > 0
-            ? `radial-gradient(circle at 50% 55%, ${fallbackGlow}2b 0%, transparent 70%)`
-            : "radial-gradient(circle at 50% 55%, rgba(255,255,255,0.06) 0%, transparent 70%)",
+            ? `radial-gradient(circle at 50% 55%, ${fallbackGlow}2e 0%, transparent 70%)`
+            : "radial-gradient(circle at 50% 55%, rgba(59,134,255,0.08) 0%, transparent 70%)",
         }}
       />
 
@@ -910,7 +910,7 @@ export default function HomePage() {
   const [maxDuration, setMaxDuration] = useState(30);
   const [captions, setCaptions] = useState(true);
   const [titleOverlay, setTitleOverlay] = useState(true);
-  const [captionPreset, setCaptionPreset] = useState("streamer");
+  const [captionPreset, setCaptionPreset] = useState("bouncy_trendy");
   const [font, setFont] = useState("");
   const [captionAnimation, setCaptionAnimation] = useState("auto");
   const [captionGlow, setCaptionGlow] = useState("auto");
@@ -1011,22 +1011,23 @@ export default function HomePage() {
   const pctEnd = duration ? (rangeEnd / duration) * 100 : 100;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-12">
-      {/* Hero Header with Minimalist Typography */}
-      <div className="text-center space-y-4">
-        <div className="inline-flex items-center gap-2">
-          <Badge variant="brand" size="md" dot leftIcon={<Stars01 className="w-3.5 h-3.5 stroke-[2]" />}>
-            Multimodal Engagement Intelligence
-          </Badge>
+    <div className="max-w-5xl mx-auto space-y-12">
+      {/* Samsaam-Style Hero Header */}
+      <div className="text-center space-y-5 pt-2">
+        <div className="inline-flex items-center justify-center">
+          <span className="eyebrow">
+            <Stars01 className="w-3.5 h-3.5 stroke-[2.2]" />
+            After Effects style captions · 9:16 Studio
+          </span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-[-0.03em] text-gray-900 dark:text-zinc-50 leading-[1.15]">
-          Transform Long Videos into{" "}
-          <span className="gradient-text font-bold">Viral 9:16 Shorts</span>
+        <h1 className="text-4xl sm:text-5xl md:text-[56px] font-bold tracking-[-0.03em] text-[#0c1836] dark:text-white leading-[1.06] max-w-3xl mx-auto">
+          The captions behind today&rsquo;s{" "}
+          <span className="text-[#3b86ff]">viral clips.</span>
         </h1>
 
-        <p className="text-gray-600 dark:text-zinc-400 max-w-2xl mx-auto text-sm sm:text-base font-normal leading-relaxed">
-          Autonomous viral moment extraction, intelligent speaker crop & split-cam reframing, and word-by-word animated subtitles for YouTube Shorts, Instagram Reels & TikTok.
+        <p className="text-[#4d5b85] dark:text-[#9da4b0] max-w-2xl mx-auto text-base sm:text-[18px] font-medium leading-relaxed">
+          High-quality motion. Zero complexity. Autonomous 9:16 moment extraction, speaker framing, and authentic creator captions.
         </p>
       </div>
 
@@ -1036,22 +1037,22 @@ export default function HomePage() {
           label="Processing Engine"
           value="CUDA 12"
           hint="Whisper Turbo Fast Mode"
-          icon={<Lightning01 className="w-4 h-4 text-brand-600 dark:text-brand-400 stroke-[2]" />}
+          icon={<Lightning01 className="w-4 h-4 stroke-[2]" />}
           badge={<Badge variant="success" size="sm">Active</Badge>}
         />
         <MetricCard
           label="Aspect Ratio"
           value="9:16"
           hint="Smart Split & Solo Speaker"
-          icon={<Film01 className="w-4 h-4 text-brand-600 dark:text-brand-400 stroke-[2]" />}
+          icon={<Film01 className="w-4 h-4 stroke-[2]" />}
           badge={<Badge variant="brand" size="sm">1080p</Badge>}
         />
         <MetricCard
           label="Subtitle Engine"
-          value="9 Styles"
-          hint="Hinglish & English Sync"
-          icon={<Type01 className="w-4 h-4 text-brand-600 dark:text-brand-400 stroke-[2]" />}
-          badge={<Badge variant="purple" size="sm">Word-Sync</Badge>}
+          value="21 Styles"
+          hint="12 Samsaam + 9 Classic"
+          icon={<Type01 className="w-4 h-4 stroke-[2]" />}
+          badge={<Badge variant="brand" size="sm">Word-Sync</Badge>}
         />
         <MetricCard
           label="Virality Scoring"
@@ -1062,30 +1063,30 @@ export default function HomePage() {
         />
       </div>
 
-      {/* Main Generator Form with Spatial Hierarchy */}
-      <form onSubmit={handleSubmit}>
+      {/* Main Generator Form */}
+      <form onSubmit={handleSubmit} id="studio-source">
         <Card className="p-6 sm:p-9 space-y-10">
           {/* Step 1: Video Source */}
           <section className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
-                <span className="w-6 h-6 rounded-lg bg-brand-50 text-brand-700 border border-brand-200 dark:bg-brand-950/80 dark:border-brand-800/60 dark:text-brand-300 text-xs font-semibold flex items-center justify-center">
+                <span className="w-7 h-7 rounded-full bg-[#eef4ff] text-[#2563eb] border border-[#b5d2ff] dark:bg-[#111e3e] dark:border-[#3b86ff]/40 dark:text-[#85b5ff] text-xs font-bold flex items-center justify-center">
                   01
                 </span>
-                <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-zinc-200">
+                <h2 className="text-xs font-semibold uppercase tracking-[0.08em] text-[#4d5b85] dark:text-[#9da4b0]">
                   Select Video Source
                 </h2>
               </div>
 
-              {/* Source Mode Segmented Tabs */}
-              <div className="flex items-center p-1 bg-gray-100 dark:bg-zinc-950 rounded-xl border border-gray-200 dark:border-zinc-800 text-xs font-semibold">
+              {/* Source Mode Segmented Pill Tabs */}
+              <div className="flex items-center p-1 bg-[#eef4ff] dark:bg-[#1c1e22] rounded-full border border-[#dae7ff] dark:border-[#2a2d33] text-xs font-semibold">
                 <button
                   type="button"
                   onClick={() => setSourceTab("url")}
-                  className={`px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+                  className={`px-4 py-1.5 rounded-full transition-all cursor-pointer ${
                     sourceTab === "url"
-                      ? "bg-white text-gray-900 dark:bg-brand-600 dark:text-white shadow-xs font-semibold"
-                      : "text-gray-500 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-zinc-200 font-medium"
+                      ? "bg-[#3b86ff] text-white shadow-[0_2px_10px_rgba(59,134,255,0.45)]"
+                      : "text-[#4d5b85] hover:text-[#0c1836] dark:text-[#9da4b0] dark:hover:text-white font-medium"
                   }`}
                 >
                   Link / Stream
@@ -1093,10 +1094,10 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={() => setSourceTab("upload")}
-                  className={`px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+                  className={`px-4 py-1.5 rounded-full transition-all cursor-pointer ${
                     sourceTab === "upload"
-                      ? "bg-white text-gray-900 dark:bg-brand-600 dark:text-white shadow-xs font-semibold"
-                      : "text-gray-500 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-zinc-200 font-medium"
+                      ? "bg-[#3b86ff] text-white shadow-[0_2px_10px_rgba(59,134,255,0.45)]"
+                      : "text-[#4d5b85] hover:text-[#0c1836] dark:text-[#9da4b0] dark:hover:text-white font-medium"
                   }`}
                 >
                   Upload File
@@ -1145,29 +1146,29 @@ export default function HomePage() {
             )}
 
             {probing && (
-              <div className="p-4 rounded-xl border border-brand-200 bg-brand-50 text-xs text-brand-700 dark:border-brand-500/30 dark:bg-brand-950/20 dark:text-brand-300 flex items-center gap-2.5">
-                <Loading01 className="w-4 h-4 animate-spin text-brand-600 dark:text-brand-400 stroke-[2]" />
+              <div className="p-4 rounded-xl border border-[#b5d2ff] bg-[#eef4ff] text-xs text-[#2563eb] dark:border-[#3b86ff]/30 dark:bg-[#111e3e]/40 dark:text-[#85b5ff] flex items-center gap-2.5">
+                <Loading01 className="w-4 h-4 animate-spin text-[#3b86ff] stroke-[2]" />
                 <span>Extracting video metadata, duration, audio streams, and heatmap indicators...</span>
               </div>
             )}
 
             {/* Probe Result Card */}
             {probe && (
-              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center p-4 rounded-2xl border border-gray-200 bg-gray-50/60 dark:border-zinc-800 dark:bg-zinc-950/60 shadow-xs">
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center p-4 rounded-2xl border border-[#dae7ff] bg-[#f5f8ff] dark:border-[#2a2d33] dark:bg-[#1c1e22]/70 shadow-xs">
                 {probe.thumbnail ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={probe.thumbnail}
                     alt={probe.title}
-                    className="w-full sm:w-36 h-20 object-cover rounded-xl flex-none border border-gray-200 dark:border-zinc-800/80"
+                    className="w-full sm:w-36 h-20 object-cover rounded-xl flex-none border border-[#dae7ff] dark:border-[#2a2d33]"
                   />
                 ) : (
-                  <div className="w-full sm:w-36 h-20 rounded-xl bg-gray-100 border border-gray-200 dark:bg-zinc-900 dark:border-zinc-800 flex items-center justify-center flex-none text-gray-400 dark:text-zinc-500">
+                  <div className="w-full sm:w-36 h-20 rounded-xl bg-[#eef4ff] border border-[#dae7ff] dark:bg-[#141518] dark:border-[#2a2d33] flex items-center justify-center flex-none text-[#4d5b85] dark:text-[#9da4b0]">
                     <Film01 className="w-7 h-7 stroke-[1.5]" />
                   </div>
                 )}
                 <div className="min-w-0 flex-1 space-y-2">
-                  <div className="text-sm font-semibold text-gray-900 dark:text-zinc-100 line-clamp-1">{probe.title}</div>
+                  <div className="text-sm font-semibold text-[#0c1836] dark:text-white line-clamp-1">{probe.title}</div>
                   <div className="flex flex-wrap items-center gap-2">
                     {isLive ? (
                       <Badge variant="rose" size="sm" dot leftIcon={<Signal01 className="w-3 h-3 stroke-[2]" />}>
@@ -1179,7 +1180,7 @@ export default function HomePage() {
                       </Badge>
                     )}
                     {probe.channel && (
-                      <Badge variant="purple" size="sm">
+                      <Badge variant="brand" size="sm">
                         {probe.channel}
                       </Badge>
                     )}
@@ -1208,21 +1209,21 @@ export default function HomePage() {
 
           {/* Step 2: Time Range & Duration */}
           {probe && (
-            <section className="space-y-4 pt-6 border-t border-gray-200 dark:border-zinc-800/80">
+            <section className="space-y-4 pt-6 border-t border-[#dae7ff] dark:border-[#2a2d33]">
               <div className="flex items-center gap-2.5">
-                <span className="w-6 h-6 rounded-lg bg-brand-50 text-brand-700 border border-brand-200 dark:bg-brand-950/80 dark:border-brand-800/60 dark:text-brand-300 text-xs font-semibold flex items-center justify-center">
+                <span className="w-7 h-7 rounded-full bg-[#eef4ff] text-[#2563eb] border border-[#b5d2ff] dark:bg-[#111e3e] dark:border-[#3b86ff]/40 dark:text-[#85b5ff] text-xs font-bold flex items-center justify-center">
                   02
                 </span>
-                <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-zinc-200">
+                <h2 className="text-xs font-semibold uppercase tracking-[0.08em] text-[#4d5b85] dark:text-[#9da4b0]">
                   {isLive ? "Stream Recording Window" : "Video Selection Range"}
                 </h2>
               </div>
 
               {isLive ? (
-                <div className="space-y-3 p-4 rounded-2xl bg-gray-50/60 dark:bg-zinc-950/40 border border-gray-200 dark:border-zinc-800/80">
+                <div className="space-y-3 p-4 rounded-2xl bg-[#f5f8ff] dark:bg-[#1c1e22]/55 border border-[#dae7ff] dark:border-[#2a2d33]">
                   <div className="flex justify-between text-xs">
-                    <span className="text-gray-500 dark:text-zinc-400">Capture Window</span>
-                    <span className="text-brand-600 dark:text-brand-300 font-bold">{liveMinutes} minutes</span>
+                    <span className="text-[#4d5b85] dark:text-[#9da4b0]">Capture Window</span>
+                    <span className="text-[#3b86ff] font-bold">{liveMinutes} minutes</span>
                   </div>
                   <input
                     type="range"
@@ -1230,19 +1231,19 @@ export default function HomePage() {
                     max={120}
                     value={liveMinutes}
                     onChange={(e) => setLiveMinutes(Number(e.target.value))}
-                    className="w-full accent-brand-500"
+                    className="w-full accent-[#3b86ff]"
                     aria-label="Minutes of live stream to record"
                   />
-                  <p className="text-[11px] text-gray-500 dark:text-zinc-500">
+                  <p className="text-[11px] text-[#4d5b85] dark:text-[#9da4b0]">
                     Recording initiates upon submission; short clips are rendered right after capture finishes.
                   </p>
                 </div>
               ) : (
-                <div className="space-y-4 p-4 sm:p-5 rounded-2xl bg-gray-50/60 dark:bg-zinc-950/40 border border-gray-200 dark:border-zinc-800/80">
+                <div className="space-y-4 p-4 sm:p-5 rounded-2xl bg-[#f5f8ff] dark:bg-[#1c1e22]/55 border border-[#dae7ff] dark:border-[#2a2d33]">
                   <div className="dual-range relative h-7">
-                    <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-2 rounded-full bg-gray-200 dark:bg-zinc-800/90" />
+                    <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-2 rounded-full bg-[#dae7ff] dark:bg-[#2a2d33]" />
                     <div
-                      className="absolute top-1/2 -translate-y-1/2 h-2 rounded-full bg-gradient-to-r from-brand-600 via-brand-500 to-indigo-500 shadow-xs"
+                      className="absolute top-1/2 -translate-y-1/2 h-2 rounded-full bg-gradient-to-r from-[#2563eb] via-[#3b86ff] to-[#6ea8ff] shadow-xs"
                       style={{ left: `${pctStart}%`, right: `${100 - pctEnd}%` }}
                     />
                     <input
@@ -1266,16 +1267,16 @@ export default function HomePage() {
                   <div className="flex flex-wrap items-end justify-between gap-4">
                     <div className="flex items-end gap-3">
                       <TimeInput label="From (Start)" value={rangeStart} onCommit={setStart} />
-                      <span className="text-gray-400 dark:text-zinc-600 pb-2.5">→</span>
+                      <span className="text-[#4d5b85] dark:text-[#9da4b0] pb-2.5">→</span>
                       <TimeInput label="To (End)" value={rangeEnd} onCommit={setEnd} />
                     </div>
 
                     <div className="flex items-center gap-3">
                       <div className="text-right">
-                        <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-zinc-500 font-semibold">
+                        <div className="text-[10px] uppercase tracking-wider text-[#4d5b85] dark:text-[#9da4b0] font-semibold">
                           Selected Duration
                         </div>
-                        <div className="text-sm font-bold text-brand-600 dark:text-brand-300 font-mono">
+                        <div className="text-sm font-bold text-[#3b86ff] font-mono">
                           {fmtTime(selectedLen)}
                         </div>
                       </div>
@@ -1301,12 +1302,12 @@ export default function HomePage() {
           )}
 
           {/* Step 3: Clips Output Settings */}
-          <section className="space-y-4 pt-6 border-t border-gray-200 dark:border-zinc-800/80">
+          <section className="space-y-4 pt-6 border-t border-[#dae7ff] dark:border-[#2a2d33]">
             <div className="flex items-center gap-2.5">
-              <span className="w-6 h-6 rounded-lg bg-brand-50 text-brand-700 border border-brand-200 dark:bg-brand-950/80 dark:border-brand-800/60 dark:text-brand-300 text-xs font-semibold flex items-center justify-center">
+              <span className="w-7 h-7 rounded-full bg-[#eef4ff] text-[#2563eb] border border-[#b5d2ff] dark:bg-[#111e3e] dark:border-[#3b86ff]/40 dark:text-[#85b5ff] text-xs font-bold flex items-center justify-center">
                 03
               </span>
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-zinc-200">
+              <h2 className="text-xs font-semibold uppercase tracking-[0.08em] text-[#4d5b85] dark:text-[#9da4b0]">
                 Clip Count & Duration Presets
               </h2>
             </div>
@@ -1314,13 +1315,13 @@ export default function HomePage() {
             <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-6 items-start">
               {/* Number of Clips */}
               <div className="space-y-2">
-                <span className="text-xs font-semibold text-gray-800 dark:text-zinc-300 block">Total Clips</span>
+                <span className="text-xs font-semibold text-[#0c1836] dark:text-[#f1f4f9] block">Total Clips</span>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     aria-label="Fewer clips"
                     onClick={() => setClipCount((c) => Math.max(2, c - 1))}
-                    className="w-10 h-10 rounded-xl border border-gray-300 dark:border-zinc-800 bg-white dark:bg-zinc-950/60 hover:bg-gray-50 dark:hover:bg-zinc-800 text-gray-700 dark:text-zinc-300 flex items-center justify-center transition shadow-xs cursor-pointer"
+                    className="w-10 h-10 rounded-xl border border-[#dae7ff] dark:border-[#2a2d33] bg-white dark:bg-[#1c1e22] hover:bg-[#eef4ff] dark:hover:bg-[#24272c] text-[#0c1836] dark:text-[#f1f4f9] flex items-center justify-center transition shadow-xs cursor-pointer"
                   >
                     <Minus className="w-4 h-4 stroke-[2]" />
                   </button>
@@ -1329,28 +1330,28 @@ export default function HomePage() {
                     min={2}
                     value={clipCount}
                     onChange={(e) => setClipCount(Math.max(2, Math.floor(Number(e.target.value) || 2)))}
-                    className="w-16 h-10 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-xl text-center text-sm font-bold text-gray-900 dark:text-zinc-100 focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 shadow-xs"
+                    className="w-16 h-10 bg-white dark:bg-[#1c1e22] border border-[#dae7ff] dark:border-[#2a2d33] rounded-xl text-center text-sm font-bold text-[#0c1836] dark:text-white focus:outline-none focus:border-[#3b86ff] focus:ring-4 focus:ring-[#3b86ff]/20 shadow-xs"
                     aria-label="Number of clips"
                   />
                   <button
                     type="button"
                     aria-label="More clips"
                     onClick={() => setClipCount((c) => c + 1)}
-                    className="w-10 h-10 rounded-xl border border-gray-300 dark:border-zinc-800 bg-white dark:bg-zinc-950/60 hover:bg-gray-50 dark:hover:bg-zinc-800 text-gray-700 dark:text-zinc-300 flex items-center justify-center transition shadow-xs cursor-pointer"
+                    className="w-10 h-10 rounded-xl border border-[#dae7ff] dark:border-[#2a2d33] bg-white dark:bg-[#1c1e22] hover:bg-[#eef4ff] dark:hover:bg-[#24272c] text-[#0c1836] dark:text-[#f1f4f9] flex items-center justify-center transition shadow-xs cursor-pointer"
                   >
                     <Plus className="w-4 h-4 stroke-[2]" />
                   </button>
                 </div>
-                <div className="text-[11px] text-gray-500 dark:text-zinc-500">
+                <div className="text-[11px] text-[#4d5b85] dark:text-[#9da4b0]">
                   Minimum 2.{probe && selectedLen > 0 && ` Fits ~${suggestedMax} clips.`}
                 </div>
               </div>
 
               {/* Length Presets using SelectionCards */}
               <div className="space-y-2">
-                <div className="text-xs font-semibold text-gray-800 dark:text-zinc-300 flex items-center justify-between">
+                <div className="text-xs font-semibold text-[#0c1836] dark:text-[#f1f4f9] flex items-center justify-between">
                   <span>Clip Length Target</span>
-                  <span className="font-mono text-brand-600 dark:text-brand-300 font-bold">
+                  <span className="font-mono text-[#3b86ff] font-bold">
                     {minDuration}s – {maxDuration}s
                   </span>
                 </div>
@@ -1377,9 +1378,9 @@ export default function HomePage() {
                       value={minDuration}
                       aria-label="Minimum clip seconds"
                       onChange={(e) => setMinDuration(Math.max(1, Math.min(179, Number(e.target.value))))}
-                      className="w-20 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-xl px-2.5 py-1.5 text-xs text-center text-gray-900 dark:text-zinc-100 focus:outline-none focus:border-brand-500"
+                      className="w-20 bg-white dark:bg-[#1c1e22] border border-[#dae7ff] dark:border-[#2a2d33] rounded-xl px-2.5 py-1.5 text-xs text-center text-[#0c1836] dark:text-[#f1f4f9] focus:outline-none focus:border-[#3b86ff]"
                     />
-                    <span className="text-gray-500 text-xs">to</span>
+                    <span className="text-[#4d5b85] dark:text-[#9da4b0] text-xs">to</span>
                     <input
                       type="number"
                       min={2}
@@ -1387,28 +1388,28 @@ export default function HomePage() {
                       value={maxDuration}
                       aria-label="Maximum clip seconds"
                       onChange={(e) => setMaxDuration(Math.max(2, Math.min(180, Number(e.target.value))))}
-                      className="w-20 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-xl px-2.5 py-1.5 text-xs text-center text-gray-900 dark:text-zinc-100 focus:outline-none focus:border-brand-500"
+                      className="w-20 bg-white dark:bg-[#1c1e22] border border-[#dae7ff] dark:border-[#2a2d33] rounded-xl px-2.5 py-1.5 text-xs text-center text-[#0c1836] dark:text-[#f1f4f9] focus:outline-none focus:border-[#3b86ff]"
                     />
-                    <span className="text-gray-500 text-[11px]">seconds (max 180s)</span>
+                    <span className="text-[#4d5b85] dark:text-[#9da4b0] text-[11px]">seconds (max 180s)</span>
                   </div>
                 )}
               </div>
             </div>
           </section>
 
-          {/* Step 4: Caption Styles & Aesthetics */}
-          <section className="space-y-5 pt-6 border-t border-gray-200 dark:border-zinc-800/80">
+          {/* Step 4: Samsaam Studio — Captions, Animations & Layout */}
+          <section id="caption-styles" className="space-y-6 pt-6 border-t border-[#dae7ff] dark:border-[#2a2d33]">
             <div className="flex items-center gap-2.5">
-              <span className="w-6 h-6 rounded-lg bg-brand-50 text-brand-700 border border-brand-200 dark:bg-brand-950/80 dark:border-brand-800/60 dark:text-brand-300 text-xs font-semibold flex items-center justify-center">
+              <span className="w-7 h-7 rounded-full bg-[#eef4ff] text-[#2563eb] border border-[#b5d2ff] dark:bg-[#111e3e] dark:border-[#3b86ff]/40 dark:text-[#85b5ff] text-xs font-bold flex items-center justify-center">
                 04
               </span>
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-zinc-200">
-                Captions, Fonts & Layout
+              <h2 className="text-xs font-semibold uppercase tracking-[0.08em] text-[#4d5b85] dark:text-[#9da4b0]">
+                Captions, Animations & Layout
               </h2>
             </div>
 
             {/* Feature Toggles */}
-            <div className="flex flex-wrap gap-6 p-4 rounded-2xl bg-gray-50/60 dark:bg-zinc-950/40 border border-gray-200 dark:border-zinc-800/80">
+            <div className="flex flex-wrap gap-6 p-4 rounded-2xl bg-[#f5f8ff] dark:bg-[#1c1e22]/55 border border-[#dae7ff] dark:border-[#2a2d33]">
               <Toggle
                 checked={captions}
                 onChange={setCaptions}
@@ -1425,39 +1426,94 @@ export default function HomePage() {
 
             {captions && (
               <>
-                {/* Live Selected Style Preview Stage */}
+                {/* Samsaam Two-Column Studio: Left Stage + Right Motion/Glow Pills */}
                 {(() => {
                   const selectedSpec = STYLES.find((x) => x.id === captionPreset) ?? STYLES[0];
                   const resolvedAnim = captionAnimation === "auto" ? selectedSpec.anim : captionAnimation;
                   return (
-                    <div className="p-4 rounded-2xl bg-gray-50/70 dark:bg-zinc-950/60 border border-gray-200 dark:border-zinc-800/80 space-y-3">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          <Badge color="brand">Live Stage Preview</Badge>
-                          <span className="text-xs font-semibold text-gray-900 dark:text-zinc-100">
+                    <div
+                      id="animation-studio"
+                      className="grid grid-cols-1 lg:grid-cols-[400px_minmax(0,1fr)] gap-3 items-stretch"
+                    >
+                      {/* Left Dark Studio Stage */}
+                      <div className="flex flex-col gap-2.5">
+                        <CaptionStylePreview
+                          spec={selectedSpec}
+                          overrideFont={font}
+                          overrideAnimation={captionAnimation}
+                          overrideGlow={captionGlow}
+                          interactive
+                        />
+                        <div className="flex items-center justify-between px-3.5 py-2 rounded-xl border border-[#dae7ff] dark:border-[#2a2d33] bg-[#f5f8ff] dark:bg-[#111216]/90 text-[11px]">
+                          <span className="font-semibold text-[#0c1836] dark:text-white truncate">
                             {selectedSpec.label}
                           </span>
+                          <span className="text-[#4d5b85] dark:text-[#9da4b0] truncate">
+                            {font || "Paired"} · {resolvedAnim} · Glow: {captionGlow}
+                          </span>
                         </div>
-                        <span className="text-[11px] text-gray-500 dark:text-zinc-400">
-                          Font: {font || "Paired Default"} · Anim: {resolvedAnim} · Glow: {captionGlow}
-                        </span>
                       </div>
-                      <CaptionStylePreview
-                        spec={selectedSpec}
-                        overrideFont={font}
-                        overrideAnimation={captionAnimation}
-                        overrideGlow={captionGlow}
-                        interactive
-                      />
+
+                      {/* Right Motion & Glow Pill Panel (Samsaam AnimationShowcase style) */}
+                      <div className="flex flex-col justify-between gap-4 p-5 rounded-2xl border border-[#dae7ff] dark:border-[#2a2d33] bg-[#f5f8ff] dark:bg-gradient-to-b dark:from-[#111216]/90 dark:to-[#0c0d10]/95 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+                        <div className="space-y-3">
+                          <div className="text-sm font-semibold tracking-tight text-[#0c1836] dark:text-[#f1f4f9] text-center lg:text-left">
+                            Animation Presets
+                          </div>
+                          <div className="flex flex-wrap justify-center lg:justify-start gap-2">
+                            {ANIMATIONS.map((a) => (
+                              <button
+                                key={a.id}
+                                type="button"
+                                data-active={captionAnimation === a.id ? "true" : "false"}
+                                onClick={() => setCaptionAnimation(a.id)}
+                                className="samsaam-pill cursor-pointer"
+                              >
+                                {a.id === "auto" ? "Auto" : a.label.replace(/\s*\([^)]*\)/g, "")}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 pt-3 border-t border-[#dae7ff] dark:border-[#2a2d33]">
+                          <div className="text-xs font-semibold text-[#4d5b85] dark:text-[#9da4b0]">
+                            Glow Intensity
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {GLOW_LEVELS.map((g) => {
+                              const active = captionGlow === g.id;
+                              return (
+                                <button
+                                  key={g.id}
+                                  type="button"
+                                  onClick={() => setCaptionGlow(g.id)}
+                                  className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-all cursor-pointer ${
+                                    active
+                                      ? "bg-[#3b86ff] text-white border-[#3b86ff] shadow-[0_0_16px_-4px_rgba(59,134,255,0.7)]"
+                                      : "bg-white dark:bg-[#1c1e22] text-[#4d5b85] dark:text-[#9da4b0] border-[#dae7ff] dark:border-[#2a2d33] hover:border-[#3b86ff]/50"
+                                  }`}
+                                >
+                                  {g.id === "auto" ? "Style Default" : g.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   );
                 })()}
 
                 {/* 12 Samsaam Creator Styles */}
-                <div className="space-y-2.5">
-                  <label className="text-xs font-semibold text-gray-800 dark:text-zinc-300 tracking-wide block">
-                    Creator Styles — Samsaam Collection (12 Presets)
-                  </label>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-[#0c1836] dark:text-[#f1f4f9] tracking-wide block">
+                      Samsaam Collection (12 Creator Templates)
+                    </label>
+                    <span className="text-[11px] text-[#3b86ff] font-medium">
+                      Click any card to preview live
+                    </span>
+                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {STYLES.slice(9).map((s) => (
                       <SelectionCard
@@ -1480,8 +1536,8 @@ export default function HomePage() {
                 </div>
 
                 {/* 9 Classic Styles */}
-                <div className="space-y-2.5">
-                  <label className="text-xs font-semibold text-gray-800 dark:text-zinc-300 tracking-wide block">
+                <div className="space-y-3">
+                  <label className="text-xs font-semibold text-[#0c1836] dark:text-[#f1f4f9] tracking-wide block">
                     Classic Viral Styles (9 Presets)
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -1505,37 +1561,10 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Animation & Glow Controls */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Select
-                    label="Caption Animation"
-                    value={captionAnimation}
-                    onChange={(e) => setCaptionAnimation(e.target.value)}
-                  >
-                    {ANIMATIONS.map((a) => (
-                      <option key={a.id} value={a.id}>
-                        {a.label}
-                      </option>
-                    ))}
-                  </Select>
-
-                  <Select
-                    label="Caption Glow Intensity"
-                    value={captionGlow}
-                    onChange={(e) => setCaptionGlow(e.target.value)}
-                  >
-                    {GLOW_LEVELS.map((g) => (
-                      <option key={g.id} value={g.id}>
-                        {g.label}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-
                 {/* Fonts Grid */}
                 <div className="space-y-2.5">
-                  <label className="text-xs font-semibold text-gray-800 dark:text-zinc-300 tracking-wide block">
-                    Subtitle Typography
+                  <label className="text-xs font-semibold text-[#0c1836] dark:text-[#f1f4f9] tracking-wide block">
+                    Subtitle Typography Override
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                     {FONTS.map((f) => {
@@ -1547,12 +1576,12 @@ export default function HomePage() {
                           onClick={() => setFont(f.id)}
                           className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                             isSelected
-                              ? "border-brand-500 bg-brand-50/50 dark:bg-brand-950/50 ring-2 ring-brand-500/25 shadow-xs"
-                              : "border-gray-200 bg-white dark:border-zinc-800/80 dark:bg-zinc-950/40 hover:border-gray-300 dark:hover:border-zinc-700 hover:bg-gray-50/50 dark:hover:bg-zinc-900/50"
+                              ? "border-[#3b86ff] bg-[#eef4ff] dark:bg-[#111e3e]/70 ring-2 ring-[#3b86ff]/25 shadow-xs"
+                              : "border-[#dae7ff] bg-white dark:border-[#2a2d33] dark:bg-[#111216]/90 hover:border-[#b5d2ff] dark:hover:border-[#3b86ff]/40 hover:bg-[#f5f8ff] dark:hover:bg-[#181a20]"
                           }`}
                         >
                           <div
-                            className="text-xs text-amber-600 dark:text-yellow-300 truncate"
+                            className="text-xs text-[#3b86ff] dark:text-[#85b5ff] truncate"
                             style={{
                               fontFamily: f.css,
                               fontWeight: f.weight ?? 800,
@@ -1561,7 +1590,7 @@ export default function HomePage() {
                           >
                             VIRAL HOOK
                           </div>
-                          <div className="text-[10px] text-gray-500 dark:text-zinc-400 mt-1">{f.label}</div>
+                          <div className="text-[10px] text-[#4d5b85] dark:text-[#9da4b0] mt-1">{f.label}</div>
                         </button>
                       );
                     })}
@@ -1593,7 +1622,7 @@ export default function HomePage() {
 
               {language !== "en" && (
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-gray-800 dark:text-zinc-300 tracking-wide block">
+                  <label className="text-xs font-semibold text-[#0c1836] dark:text-[#f1f4f9] tracking-wide block">
                     Hindi Transcription Accuracy
                   </label>
                   <div className="grid grid-cols-2 gap-2">
