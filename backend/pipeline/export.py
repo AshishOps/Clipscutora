@@ -42,6 +42,8 @@ async def export_all_clips(
     title_overlay: bool = True,
     clip_source=None,  # optional async (idx, start, end) -> (video_path, shift) for per-clip video
     layout_info: Optional[Dict[str, Any]] = None,
+    caption_animation: str = "auto",
+    caption_glow: str = "auto",
 ) -> List[Dict[str, Any]]:
     """
     Optimized OpenShorts export pipeline:
@@ -108,6 +110,8 @@ async def export_all_clips(
                     title=clip.title if want_title else None,
                     include_words=captions_enabled,
                     font=caption_font,
+                    animation=caption_animation,
+                    glow=caption_glow,
                 )
                 subtitle_file = sub_target
 

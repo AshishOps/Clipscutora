@@ -3,6 +3,22 @@ import { BACKEND_URL, sendJobToBackend } from "@/lib/backend";
 
 export const runtime = "edge";
 
+const VALID_ANIMATIONS = new Set([
+  "auto",
+  "none",
+  "pop",
+  "bounce-drop",
+  "word-by-word",
+  "word-wave",
+  "blur-in",
+  "soft-rise",
+  "drift-right",
+  "focus-settle",
+  "flicker-in",
+]);
+
+const VALID_GLOWS = new Set(["auto", "off", "subtle", "medium", "intense"]);
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -17,6 +33,8 @@ export async function POST(req: NextRequest) {
       range,
       live_minutes,
       font,
+      caption_animation,
+      caption_glow,
       title_overlay,
       hindi_quality,
     } = body;
@@ -31,6 +49,12 @@ export async function POST(req: NextRequest) {
     const liveMinutes = num(live_minutes);
     const fontName = typeof font === "string" && /^[\w ]{1,40}$/.test(font) ? font : "";
     const lang = /^[a-z]{2,3}$|^auto$/.test(String(language || "")) ? String(language) : "auto";
+    const captionAnimation = VALID_ANIMATIONS.has(String(caption_animation || ""))
+      ? String(caption_animation)
+      : "auto";
+    const captionGlow = VALID_GLOWS.has(String(caption_glow || ""))
+      ? String(caption_glow)
+      : "auto";
 
     if (!source) {
       return NextResponse.json({ error: "Missing source video URL or path" }, { status: 400 });
@@ -48,6 +72,8 @@ export async function POST(req: NextRequest) {
       range_end: rangeEnd,
       live_minutes: liveMinutes,
       caption_font: fontName || null,
+      caption_animation: captionAnimation,
+      caption_glow: captionGlow,
       title_overlay: title_overlay !== false,
       hindi_quality: hindi_quality === "best" ? "best" : "fast",
       captions: captions !== false,

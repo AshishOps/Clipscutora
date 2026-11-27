@@ -9,6 +9,8 @@ export interface SubmitJobRequest {
   range?: { start: number; end: number } | null;
   live_minutes?: number | null;
   font?: string;
+  caption_animation?: string;
+  caption_glow?: string;
   title_overlay?: boolean;
   hindi_quality?: "fast" | "best";
 }

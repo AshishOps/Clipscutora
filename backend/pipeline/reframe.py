@@ -280,6 +280,16 @@ def _escape_sub_path(path: Path) -> str:
     """Format subtitle path for FFmpeg libass filter."""
     return str(path).replace("\\", "/").replace(":", "\\:")
 
+
+def _ass_filter_expr(subtitle_path: Path) -> str:
+    """Return FFmpeg ass filter string including bundled backend/fonts when available."""
+    sub_str = _escape_sub_path(subtitle_path)
+    fonts_dir = config.PROJECT_ROOT / "fonts"
+    if fonts_dir.exists() and any(fonts_dir.glob("*.[to]tf")):
+        fdir_str = _escape_sub_path(fonts_dir)
+        return f"ass='{sub_str}':fontsdir='{fdir_str}'"
+    return f"ass='{sub_str}'"
+
 def _build_split_cam_command(
     source_video: Path,
     start: float,
@@ -334,8 +344,7 @@ def _build_split_cam_command(
     )
 
     if subtitle_path and subtitle_path.exists():
-        sub_str = _escape_sub_path(subtitle_path)
-        filter_complex += f";[v_boxed]ass='{sub_str}'[outv]"
+        filter_complex += f";[v_boxed]{_ass_filter_expr(subtitle_path)}[outv]"
     else:
         filter_complex += f";[v_boxed]null[outv]"
 
@@ -372,8 +381,7 @@ def _build_single_speaker_command(
     )
 
     if subtitle_path and subtitle_path.exists():
-        sub_str = _escape_sub_path(subtitle_path)
-        filter_str += f",ass='{sub_str}'"
+        filter_str += f",{_ass_filter_expr(subtitle_path)}"
 
     return [
         "ffmpeg", "-y",
@@ -408,8 +416,7 @@ def _build_blur_fallback_command(
     )
 
     if subtitle_path and subtitle_path.exists():
-        sub_str = _escape_sub_path(subtitle_path)
-        filter_complex += f";[v_overlay]ass='{sub_str}'[outv]"
+        filter_complex += f";[v_overlay]{_ass_filter_expr(subtitle_path)}[outv]"
     else:
         filter_complex += f";[v_overlay]null[outv]"
 

@@ -70,6 +70,8 @@ class JobRequest(BaseModel):
     range_end: Optional[float] = None
     live_minutes: Optional[float] = None
     caption_font: Optional[str] = None
+    caption_animation: str = "auto"
+    caption_glow: str = "auto"
     title_overlay: bool = True
     hindi_quality: str = "fast"
     webhook_url: Optional[str] = None
@@ -111,6 +113,8 @@ async def run_pipeline(
     range_end: Optional[float] = None,
     live_minutes: Optional[float] = None,
     caption_font: Optional[str] = None,
+    caption_animation: str = "auto",
+    caption_glow: str = "auto",
     title_overlay: bool = True,
     hindi_quality: str = "fast",
 ) -> Dict[str, Any]:
@@ -216,6 +220,8 @@ async def run_pipeline(
             caption_preset=caption_preset,
             layout_info=(await layout_task) if layout_task else {"layout": "blurred_fit", "confidence": 0.0},
             caption_font=caption_font,
+            caption_animation=caption_animation,
+            caption_glow=caption_glow,
             title_overlay=bool(title_overlay) and config.TITLE_OVERLAY,
             clip_source=clip_source,
         )
@@ -285,7 +291,12 @@ if __name__ == "__main__":
     parser.add_argument("--end", type=float, default=None, help="Only use the video up to this time (seconds)")
     parser.add_argument("--live-minutes", type=float, default=None,
                         help="For a live stream: how many minutes to record before clipping (default 10)")
-    parser.add_argument("--font", type=str, default=None, help="Caption font override, e.g. Impact")
+    parser.add_argument("--font", type=str, default=None, help="Caption font override, e.g. Montserrat Black")
+    parser.add_argument("--animation", type=str, default="auto",
+                        help="Caption animation override (auto, none, pop, bounce-drop, word-by-word, word-wave, blur-in, soft-rise, drift-right, focus-settle, flicker-in)")
+    parser.add_argument("--glow", type=str, default="auto",
+                        choices=["auto", "off", "subtle", "medium", "intense"],
+                        help="Caption multi-layer glow intensity")
     parser.add_argument("--hindi-quality", choices=["fast", "best"], default="fast",
                         help="Hindi captions: fast (turbo) or best (large-v3, ~4x slower transcription)")
     parser.add_argument("--no-captions", action="store_true", help="Disable burned-in captions")
@@ -322,6 +333,8 @@ if __name__ == "__main__":
         range_end=args.end,
         live_minutes=args.live_minutes,
         caption_font=args.font,
+        caption_animation=args.animation,
+        caption_glow=args.glow,
         title_overlay=not args.no_title,
         hindi_quality=args.hindi_quality,
     ))

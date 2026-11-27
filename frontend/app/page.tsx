@@ -154,17 +154,147 @@ const STYLES = [
     previewClass: "text-gray-800 dark:text-zinc-100 font-medium tracking-tight",
     sampleText: "Smooth & Minimal",
   },
+  {
+    id: "bouncy_trendy",
+    label: "Bouncy Trendy",
+    desc: "Two-line spring bounce drop with bright lime highlight",
+    previewClass: "text-lime-400 font-black uppercase drop-shadow-[0_0_10px_rgba(163,230,53,0.75)]",
+    previewStyle: { fontFamily: "'Montserrat', sans-serif", fontWeight: 900 },
+    sampleText: "STOP SCROLLING",
+  },
+  {
+    id: "aura_glow",
+    label: "Aura Glow",
+    desc: "Soft multi-layer white halo with crisp dark edge",
+    previewClass: "text-white font-extrabold drop-shadow-[0_0_12px_rgba(255,255,255,0.85)]",
+    previewStyle: { fontFamily: "'Poppins', sans-serif", fontWeight: 800 },
+    sampleText: "SOFT WHITE AURA",
+  },
+  {
+    id: "word_by_word",
+    label: "Word by Word",
+    desc: "Rapid center single-word punch in bold uppercase",
+    previewClass: "text-white font-black uppercase tracking-wider drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]",
+    previewStyle: { fontFamily: "'Archivo Black', sans-serif" },
+    sampleText: "UNSTOPPABLE",
+  },
+  {
+    id: "word_staircase",
+    label: "Word Staircase",
+    desc: "Staggered two-line alternating word emphasis",
+    previewClass: "text-cyan-300 font-extrabold drop-shadow-[0_0_8px_rgba(34,211,238,0.6)]",
+    previewStyle: { fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800 },
+    sampleText: "STEP BY STEP",
+  },
+  {
+    id: "deep_pop",
+    label: "Deep Pop",
+    desc: "Cool slate-blue aura glow with smooth kinetic pop",
+    previewClass: "text-sky-200 font-bold drop-shadow-[0_0_10px_rgba(56,189,248,0.75)]",
+    previewStyle: { fontFamily: "'Inter', sans-serif", fontWeight: 700 },
+    sampleText: "DEEP FOCUS MODE",
+  },
+  {
+    id: "kinetic_hook",
+    label: "Kinetic Hook",
+    desc: "Warm orange & white high-velocity italic hook",
+    previewClass: "text-orange-400 font-black italic uppercase drop-shadow-[0_0_10px_rgba(251,146,60,0.75)]",
+    previewStyle: { fontFamily: "'Kanit', sans-serif", fontWeight: 900, fontStyle: "italic" },
+    sampleText: "FAST MOMENTUM",
+  },
+  {
+    id: "afterglow",
+    label: "Afterglow",
+    desc: "Crisp white typography with luminous cyan afterglow",
+    previewClass: "text-cyan-100 font-extrabold drop-shadow-[0_0_12px_rgba(34,211,238,0.85)]",
+    previewStyle: { fontFamily: "'Poppins', sans-serif", fontWeight: 800 },
+    sampleText: "PURE CLARITY",
+  },
+  {
+    id: "devin_jatho",
+    label: "Creator Editorial",
+    desc: "Luxury serif italic hook with golden cyan contrast",
+    previewClass: "text-amber-300 font-bold italic drop-shadow-[0_0_8px_rgba(251,191,36,0.65)]",
+    previewStyle: { fontFamily: "'Playfair Display', serif", fontWeight: 700, fontStyle: "italic" },
+    sampleText: "Golden Secret",
+  },
+  {
+    id: "soft_focus",
+    label: "Soft Focus",
+    desc: "Dimmed upcoming words snapping into sharp amber focus",
+    previewClass: "text-amber-200 font-bold drop-shadow-[0_0_10px_rgba(253,224,71,0.55)]",
+    previewStyle: { fontFamily: "'Montserrat', sans-serif", fontWeight: 700 },
+    sampleText: "Sharpen Focus",
+  },
+  {
+    id: "postcard",
+    label: "Postcard Pill",
+    desc: "Dark frosted badge container with mint green highlight",
+    previewClass: "bg-zinc-900/95 text-emerald-300 font-bold px-2.5 py-0.5 rounded-full border border-white/15 shadow-sm",
+    previewStyle: { fontFamily: "'Inter', sans-serif", fontWeight: 700 },
+    sampleText: "CLEAN PILL TAG",
+  },
+  {
+    id: "neon_splash",
+    label: "Neon Splash",
+    desc: "Electric cyan-magenta splash glow for hype moments",
+    previewClass: "text-fuchsia-400 font-black tracking-wide drop-shadow-[0_0_12px_rgba(232,121,249,0.85)]",
+    previewStyle: { fontFamily: "'Bangers', cursive" },
+    sampleText: "EPIC CLUTCH!",
+  },
+  {
+    id: "gold_sweep",
+    label: "Gold Sweep",
+    desc: "Progressive warm gold karaoke sweep with amber bloom",
+    previewClass: "text-amber-300 font-bold tracking-wider drop-shadow-[0_0_10px_rgba(245,158,11,0.75)]",
+    previewStyle: { fontFamily: "'Bebas Neue', sans-serif" },
+    sampleText: "MILLION DOLLAR",
+  },
 ];
 
 const FONTS = [
   { id: "", label: "Style Default", css: "inherit" },
-  { id: "Arial Black", label: "Arial Black", css: "'Arial Black', sans-serif" },
-  { id: "Impact", label: "Impact", css: "Impact, sans-serif" },
-  { id: "Segoe UI Black", label: "Segoe UI Black", css: "'Segoe UI Black', sans-serif" },
-  { id: "Comic Sans MS", label: "Comic Sans", css: "'Comic Sans MS', cursive" },
-  { id: "Bahnschrift", label: "Bahnschrift", css: "Bahnschrift, sans-serif" },
-  { id: "Franklin Gothic Medium", label: "Franklin Gothic", css: "'Franklin Gothic Medium', sans-serif" },
-  { id: "Verdana", label: "Verdana", css: "Verdana, sans-serif" },
+  { id: "Montserrat", label: "Montserrat Bold", css: "'Montserrat', sans-serif", weight: 700 },
+  { id: "Montserrat Black", label: "Montserrat Black", css: "'Montserrat', sans-serif", weight: 900 },
+  { id: "Poppins", label: "Poppins Bold", css: "'Poppins', sans-serif", weight: 700 },
+  { id: "Poppins ExtraBold", label: "Poppins ExtraBold", css: "'Poppins', sans-serif", weight: 800 },
+  { id: "Kanit", label: "Kanit Bold", css: "'Kanit', sans-serif", weight: 700 },
+  { id: "Kanit Black", label: "Kanit Black Italic", css: "'Kanit', sans-serif", weight: 900, italic: true },
+  { id: "Plus Jakarta Sans ExtraBold", label: "Plus Jakarta Sans", css: "'Plus Jakarta Sans', sans-serif", weight: 800 },
+  { id: "Inter", label: "Inter Bold", css: "'Inter', sans-serif", weight: 700 },
+  { id: "Oswald", label: "Oswald Bold", css: "'Oswald', sans-serif", weight: 700 },
+  { id: "Bebas Neue", label: "Bebas Neue", css: "'Bebas Neue', sans-serif", weight: 400 },
+  { id: "Anton", label: "Anton", css: "'Anton', sans-serif", weight: 400 },
+  { id: "Archivo Black", label: "Archivo Black", css: "'Archivo Black', sans-serif", weight: 400 },
+  { id: "Playfair Display", label: "Playfair Italic", css: "'Playfair Display', serif", weight: 700, italic: true },
+  { id: "Caveat", label: "Caveat Script", css: "'Caveat', cursive", weight: 700 },
+  { id: "Bangers", label: "Bangers Comic", css: "'Bangers', cursive", weight: 400 },
+  { id: "Arial Black", label: "Arial Black", css: "'Arial Black', sans-serif", weight: 900 },
+  { id: "Impact", label: "Impact", css: "Impact, sans-serif", weight: 700 },
+  { id: "Segoe UI Black", label: "Segoe UI Black", css: "'Segoe UI Black', sans-serif", weight: 900 },
+  { id: "Verdana", label: "Verdana", css: "Verdana, sans-serif", weight: 700 },
+];
+
+const ANIMATIONS = [
+  { id: "auto", label: "Style Default (Auto)" },
+  { id: "bounce-drop", label: "Bounce Drop (Spring Overshoot)" },
+  { id: "word-by-word", label: "Word-by-Word Punch" },
+  { id: "word-wave", label: "Word Wave" },
+  { id: "blur-in", label: "Blur-In Resolve" },
+  { id: "soft-rise", label: "Soft Rise" },
+  { id: "drift-right", label: "Drift Right" },
+  { id: "focus-settle", label: "Focus Settle" },
+  { id: "flicker-in", label: "Flicker In" },
+  { id: "pop", label: "Classic Pop" },
+  { id: "none", label: "None (Static)" },
+];
+
+const GLOW_LEVELS = [
+  { id: "auto", label: "Style Default (Auto)" },
+  { id: "off", label: "Off (No Halo)" },
+  { id: "subtle", label: "Subtle Bloom" },
+  { id: "medium", label: "Medium Creator Halo" },
+  { id: "intense", label: "Intense Neon Glow" },
 ];
 
 export default function HomePage() {
@@ -191,6 +321,8 @@ export default function HomePage() {
   const [titleOverlay, setTitleOverlay] = useState(true);
   const [captionPreset, setCaptionPreset] = useState("streamer");
   const [font, setFont] = useState("");
+  const [captionAnimation, setCaptionAnimation] = useState("auto");
+  const [captionGlow, setCaptionGlow] = useState("auto");
   const [language, setLanguage] = useState("auto");
   const [hindiQuality, setHindiQuality] = useState<"fast" | "best">("fast");
 
@@ -272,6 +404,8 @@ export default function HomePage() {
         range: !isLive && !isFullRange ? { start: Math.round(rangeStart), end: Math.round(rangeEnd) } : null,
         live_minutes: isLive ? liveMinutes : null,
         font,
+        caption_animation: captionAnimation,
+        caption_glow: captionGlow,
         title_overlay: titleOverlay,
         hindi_quality: hindiQuality,
       });
@@ -700,10 +834,10 @@ export default function HomePage() {
 
             {captions && (
               <>
-                {/* 9 Styles Grid with SelectionCards */}
+                {/* Styles Grid with SelectionCards */}
                 <div className="space-y-2.5">
                   <label className="text-xs font-semibold text-gray-800 dark:text-zinc-300 tracking-wide block">
-                    Subtitle Style Template (9 Presets)
+                    Subtitle Style Template ({STYLES.length} Presets)
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {STYLES.map((s) => (
@@ -714,8 +848,8 @@ export default function HomePage() {
                         selected={captionPreset === s.id}
                         onClick={() => setCaptionPreset(s.id)}
                         preview={
-                          <div className="p-2.5 rounded-xl bg-gray-100 dark:bg-black/60 border border-gray-200 dark:border-zinc-800/80 text-center">
-                            <span className={`text-xs ${s.previewClass}`}>
+                          <div className="p-2.5 rounded-xl bg-gray-900 dark:bg-black/75 border border-gray-200 dark:border-zinc-800/80 text-center">
+                            <span className={`text-xs ${s.previewClass}`} style={s.previewStyle}>
                               {s.sampleText}
                             </span>
                           </div>
@@ -723,6 +857,33 @@ export default function HomePage() {
                       />
                     ))}
                   </div>
+                </div>
+
+                {/* Animation & Glow Controls */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Select
+                    label="Caption Animation"
+                    value={captionAnimation}
+                    onChange={(e) => setCaptionAnimation(e.target.value)}
+                  >
+                    {ANIMATIONS.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.label}
+                      </option>
+                    ))}
+                  </Select>
+
+                  <Select
+                    label="Caption Glow Intensity"
+                    value={captionGlow}
+                    onChange={(e) => setCaptionGlow(e.target.value)}
+                  >
+                    {GLOW_LEVELS.map((g) => (
+                      <option key={g.id} value={g.id}>
+                        {g.label}
+                      </option>
+                    ))}
+                  </Select>
                 </div>
 
                 {/* Fonts Grid */}
@@ -745,8 +906,12 @@ export default function HomePage() {
                           }`}
                         >
                           <div
-                            className="text-xs text-amber-600 dark:text-yellow-300 truncate font-semibold"
-                            style={{ fontFamily: f.css, fontWeight: 800 }}
+                            className="text-xs text-amber-600 dark:text-yellow-300 truncate"
+                            style={{
+                              fontFamily: f.css,
+                              fontWeight: f.weight ?? 800,
+                              fontStyle: f.italic ? "italic" : "normal",
+                            }}
                           >
                             VIRAL HOOK
                           </div>
