@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 import config
+from .job_control import run_cancellable, check_cancelled
 
 logger = logging.getLogger("viral_clipper.download")
 
@@ -151,16 +152,16 @@ def _ffmpeg_cut(src: Path, dst: Path, start: float, end: float) -> None:
     """Fast stream-copy cut of [start, end] (snaps to the nearest keyframes)."""
     cmd = ["ffmpeg", "-y", "-v", "error", "-ss", f"{start:.2f}", "-i", str(src), "-t", f"{end - start:.2f}",
            "-map", "0:v:0", "-map", "0:a:0?", "-c", "copy", "-avoid_negative_ts", "make_zero", str(dst)]
-    res = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    res = run_cancellable(cmd, text=True, encoding="utf-8", errors="replace")
     if res.returncode != 0 or not dst.exists():
         raise RuntimeError(f"Could not cut the selected range: {res.stderr[-300:]}")
 
 
 def _record_live(url: str, job_dir: Path, minutes: float) -> Path:
     """Record the next `minutes` of a live stream (YouTube / Twitch / any HLS live)."""
-    res = subprocess.run(
+    res = run_cancellable(
         _ytdlp() + ["-g", "-f", "bestvideo[height<=1080][protocol*=m3u8]+bestaudio[protocol*=m3u8]/best[height<=1080][protocol*=m3u8]/best[height<=1080]/best", url],
-        capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120,
+        text=True, encoding="utf-8", errors="replace", timeout=120,
     )
     stream_urls = [u for u in res.stdout.splitlines() if u.startswith("http")]
     if res.returncode != 0 or not stream_urls:
@@ -172,7 +173,7 @@ def _record_live(url: str, job_dir: Path, minutes: float) -> Path:
     if len(stream_urls) > 1:  # separate audio stream
         cmd += ["-i", stream_urls[1], "-map", "0:v:0", "-map", "1:a:0"]
     cmd += ["-t", str(secs), "-c", "copy", "-bsf:a", "aac_adtstoasc", str(out)]
-    rec = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    rec = run_cancellable(cmd, text=True, encoding="utf-8", errors="replace")
     if not out.exists() or out.stat().st_size == 0:
         raise RuntimeError(f"Live recording failed: {rec.stderr[-300:]}")
     return out
@@ -241,8 +242,7 @@ async def download_video(
     cmd.append(source)
 
     logger.info(f"Running yt-dlp on {source}" + (f" (section {start:.0f}-{end:.0f}s)" if has_range else "") + "...")
-    res = await asyncio.to_thread(subprocess.run, cmd, capture_output=True, text=True,
-                                  encoding="utf-8", errors="replace")
+    res = await asyncio.to_thread(run_cancellable, cmd, text=True, encoding="utf-8", errors="replace")
     if res.returncode != 0:
         logger.error(f"yt-dlp error: {res.stderr}")
         raise RuntimeError(f"yt-dlp failed to download video: {res.stderr.strip()[-300:]}")

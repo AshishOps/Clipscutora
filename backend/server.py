@@ -32,6 +32,9 @@ for _s in (sys.stdout, sys.stderr):
 import config  # noqa: E402
 from app import run_pipeline, update_status  # noqa: E402
 from pipeline.download import probe_source  # noqa: E402
+from pipeline.job_control import (  # noqa: E402
+    JobCancelledError, clear_cancelled, is_cancelled, mark_cancelled, reset_current_job, set_current_job,
+)
 
 HOST = os.environ.get("HOST", "0.0.0.0")
 PORT = int(os.environ.get("PORT", "8765"))
@@ -60,7 +63,13 @@ def _worker() -> None:
     while True:
         job = _jobs.get()
         job_id = job["job_id"]
+        if is_cancelled(job_id):
+            update_status(job_id, "Stopped by user", 0, status="failed", error="Stopped by user")
+            clear_cancelled(job_id)
+            _jobs.task_done()
+            continue
         _state["running"] = job_id
+        token = set_current_job(job_id)
         job_dir = config.DATA_DIR / job_id
         job_dir.mkdir(parents=True, exist_ok=True)
         handler = logging.FileHandler(job_dir / "process.log", encoding="utf-8")
@@ -68,13 +77,20 @@ def _worker() -> None:
         logging.getLogger().addHandler(handler)
         try:
             kwargs = {k: v for k, v in job.items() if k in _PIPELINE_ARGS}
-            asyncio.run(run_pipeline(**kwargs))
+            res = asyncio.run(run_pipeline(**kwargs))
+            if isinstance(res, dict) and res.get("status") == "cancelled":
+                update_status(job_id, "Stopped by user", 0, status="failed", error="Stopped by user")
+        except JobCancelledError:
+            logger.info(f"[{job_id}] Stopped by user")
+            update_status(job_id, "Stopped by user", 0, status="failed", error="Stopped by user")
         except Exception as e:
             logger.exception(f"Job {job_id} crashed: {e}")
             update_status(job_id, "Failed", 0, status="failed", error=str(e))
         finally:
             logging.getLogger().removeHandler(handler)
             handler.close()
+            reset_current_job(token)
+            clear_cancelled(job_id)
             _state["running"] = None
             _jobs.task_done()
 
@@ -106,11 +122,26 @@ class Handler(BaseHTTPRequestHandler):
         qs = parse_qs(url.query)
 
         if url.path == "/health":
+            running_id = _state["running"]
+            running_stage = None
+            running_progress = None
+            if running_id:
+                sf = config.DATA_DIR / running_id / "status.json"
+                if sf.exists():
+                    try:
+                        with open(sf, "r", encoding="utf-8") as f:
+                            sdata = json.load(f)
+                        running_stage = sdata.get("stage")
+                        running_progress = sdata.get("progress")
+                    except Exception:
+                        pass
             return self._send(200, {
                 "ok": True,
                 "model_ready": _state["model_ready"],
                 "queued": _jobs.qsize(),
-                "running": _state["running"]
+                "running": running_id,
+                "running_stage": running_stage,
+                "running_progress": running_progress,
             })
 
         if url.path == "/probe":
@@ -145,6 +176,9 @@ class Handler(BaseHTTPRequestHandler):
                 try:
                     with open(status_file, "r", encoding="utf-8") as f:
                         data = json.load(f)
+                    if data.get("status") == "processing":
+                        data["running_job"] = _state["running"]
+                        data["queued"] = _jobs.qsize()
                     return self._send(200, data)
                 except Exception:
                     pass
@@ -231,6 +265,21 @@ class Handler(BaseHTTPRequestHandler):
                 if dest.exists():
                     dest.unlink(missing_ok=True)
                 return self._send(500, {"error": str(e)})
+
+        if url.path == "/cancel":
+            job_id = (qs.get("job_id") or qs.get("jobId") or [""])[0]
+            if not job_id:
+                try:
+                    length = int(self.headers.get("Content-Length") or 0)
+                    body = json.loads(self.rfile.read(length) or b"{}")
+                    job_id = str(body.get("job_id") or body.get("jobId") or "").strip()
+                except Exception:
+                    job_id = ""
+            if not job_id or not str(job_id).replace("_", "").isalnum():
+                return self._send(400, {"error": "Invalid job_id"})
+            killed = mark_cancelled(job_id)
+            update_status(job_id, "Stopped by user", 0, status="failed", error="Stopped by user")
+            return self._send(200, {"cancelled": True, "job_id": job_id, "killed_processes": killed})
 
         if url.path not in ("/jobs", "/submit_job"):
             return self._send(404, {"error": "Not found"})

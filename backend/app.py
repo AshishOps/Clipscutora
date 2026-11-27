@@ -128,7 +128,13 @@ async def run_pipeline(
     clip_min_duration = max(config.ABSOLUTE_MIN_CLIP_DURATION, float(clip_min_duration))
     clip_max_duration = min(config.ABSOLUTE_MAX_CLIP_DURATION, max(clip_min_duration + 1, float(clip_max_duration)))
 
+    from pipeline.job_control import (
+        JobCancelledError, check_cancelled, clear_cancelled, reset_current_job, set_current_job,
+    )
+    job_token = set_current_job(job_id)
+
     try:
+        check_cancelled(job_id)
         # Stage 1: Download
         if live_minutes:
             update_status(job_id, f"Recording {live_minutes:g} min of the live stream", 5)
@@ -167,6 +173,7 @@ async def run_pipeline(
         t_dl = time.perf_counter()
 
         # Stage 2: Transcribe (GPU) while scene + layout detection run in parallel (CPU/ffmpeg)
+        check_cancelled(job_id)
         update_status(job_id, "Transcribing audio with word timestamps", 30)
         if audio_first:
             scene_task = layout_task = None  # no full video to scan; webcam is found per clip
@@ -178,6 +185,7 @@ async def run_pipeline(
         t_tr = time.perf_counter()
 
         # Stage 3: Multimodal Signal Analysis
+        check_cancelled(job_id)
         update_status(job_id, "Analyzing viral energy & engagement signals", 50)
         scene_changes = await scene_task if scene_task else []
         analysis = await analyze_signals(
@@ -190,6 +198,7 @@ async def run_pipeline(
         t_an = time.perf_counter()
 
         # Stage 4: LLM Judging & Boundary Snapping
+        check_cancelled(job_id)
         update_status(job_id, "AI virality scoring and hook extraction", 70)
         ranked = await score_and_rank(
             candidates=analysis.candidates,
@@ -204,6 +213,7 @@ async def run_pipeline(
         t_sc = time.perf_counter()
 
         # Stage 5: Reframing 9:16 + Captions + Final Export
+        check_cancelled(job_id)
         update_status(job_id, "Fetching clip video & rendering 9:16 shorts" if audio_first
                       else "Reframing to 9:16 & burning animated captions", 85)
         clip_source = None
@@ -255,10 +265,18 @@ async def run_pipeline(
 
         return {"job_id": job_id, "status": "completed", "clips": clips}
 
+    except JobCancelledError:
+        logger.info(f"Job {job_id} stopped by user.")
+        update_status(job_id, "Stopped by user", 0, status="failed", error="Stopped by user")
+        return {"job_id": job_id, "status": "cancelled", "error": "Stopped by user"}
+
     except Exception as e:
         logger.exception(f"Pipeline failed for job {job_id}: {e}")
         update_status(job_id, "Failed", 0, status="failed", error=str(e))
         return {"job_id": job_id, "status": "failed", "error": str(e)}
+    finally:
+        reset_current_job(job_token)
+        clear_cancelled(job_id)
 
 # ── Modal Function Registrations ──
 if app is not None:

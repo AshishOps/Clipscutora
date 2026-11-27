@@ -464,7 +464,8 @@ async def reframe_clip(
     cmd = build(prescale)
 
     def _run(c: List[str]) -> subprocess.CompletedProcess:
-        return subprocess.run(c, capture_output=True, text=True, encoding="utf-8", errors="replace")
+        from .job_control import run_cancellable
+        return run_cancellable(c, text=True, encoding="utf-8", errors="replace")
 
     # Run ffmpeg in a worker thread so several clips really encode in parallel.
     res = await asyncio.to_thread(_run, cmd)

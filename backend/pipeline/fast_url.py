@@ -18,6 +18,7 @@ import numpy as np
 
 import config
 from .download import VideoMetadata, _extract_heatmap_data, _get_video_duration, _ytdlp, _YT_FORMAT
+from .job_control import run_cancellable
 
 logger = logging.getLogger("viral_clipper.fast_url")
 
@@ -26,8 +27,7 @@ SR = 16000
 
 
 def _run(cmd: List[str], timeout: Optional[float] = None) -> subprocess.CompletedProcess:
-    return subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace",
-                          timeout=timeout)
+    return run_cancellable(cmd, timeout=timeout, text=True, encoding="utf-8", errors="replace")
 
 
 async def fetch_audio(url: str, job_dir: Path, start: Optional[float] = None,

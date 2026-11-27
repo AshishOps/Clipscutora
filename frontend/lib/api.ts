@@ -78,6 +78,17 @@ export interface JobStatus {
   clips?: ClipResult[];
   error?: string;
   created_at?: string;
+  running_job?: string | null;
+  queued?: number;
+}
+
+export interface BackendHealth {
+  ok: boolean;
+  model_ready: boolean;
+  queued: number;
+  running: string | null;
+  running_stage?: string | null;
+  running_progress?: number | null;
 }
 
 export async function submitJob(data: SubmitJobRequest): Promise<{ jobId: string }> {
@@ -99,4 +110,27 @@ export async function getJobStatus(jobId: string): Promise<JobStatus> {
     throw new Error("Failed to fetch job status");
   }
   return res.json();
+}
+
+export async function cancelJob(jobId: string): Promise<{ cancelled: boolean; job_id: string }> {
+  const res = await fetch("/api/cancel", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ jobId }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.error || "Failed to stop job");
+  }
+  return data;
+}
+
+export async function getBackendHealth(): Promise<BackendHealth | null> {
+  try {
+    const res = await fetch("/api/health", { cache: "no-store" });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
 }

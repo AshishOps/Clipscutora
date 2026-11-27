@@ -17,7 +17,7 @@ import {
   Signal01,
   Loading01,
 } from "@untitledui/icons";
-import { submitJob, probeSource, uploadVideo, ProbeResult } from "@/lib/api";
+import { submitJob, probeSource, uploadVideo, getBackendHealth, cancelJob, ProbeResult, BackendHealth } from "@/lib/api";
 import {
   Button,
   Badge,
@@ -919,6 +919,37 @@ export default function HomePage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [backendHealth, setBackendHealth] = useState<BackendHealth | null>(null);
+  const [stoppingActive, setStoppingActive] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const poll = async () => {
+      const h = await getBackendHealth();
+      if (active && h) setBackendHealth(h);
+    };
+    poll();
+    const timer = setInterval(poll, 4000);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, []);
+
+  const handleStopRunning = async () => {
+    const runningId = backendHealth?.running;
+    if (!runningId || stoppingActive) return;
+    setStoppingActive(true);
+    try {
+      await cancelJob(runningId);
+      const h = await getBackendHealth();
+      if (h) setBackendHealth(h);
+    } catch (e: any) {
+      setError(e?.message || "Could not stop the active job.");
+    } finally {
+      setStoppingActive(false);
+    }
+  };
 
   const duration = probe?.duration ?? 0;
   const isLive = !!probe?.is_live;
@@ -1062,6 +1093,51 @@ export default function HomePage() {
           badge={<Badge variant="amber" size="sm">Multimodal</Badge>}
         />
       </div>
+
+      {/* Active Backend Job Banner (shows whenever a job is running/blocking queue) */}
+      {backendHealth?.running && (
+        <div className="p-4 sm:p-5 rounded-2xl border border-[#3b86ff]/40 bg-[#eef4ff]/90 dark:bg-[#111e3e]/55 flex flex-wrap items-center justify-between gap-4 shadow-xs">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-full bg-[#3b86ff]/15 border border-[#3b86ff]/30 flex items-center justify-center flex-none">
+              <Loading01 className="w-4 h-4 text-[#3b86ff] animate-spin stroke-[2.2]" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-xs sm:text-sm font-semibold text-[#0c1836] dark:text-white flex items-center gap-2 flex-wrap">
+                <span>Job #{backendHealth.running} is currently running</span>
+                {backendHealth.queued > 0 && (
+                  <Badge variant="warning" size="sm">
+                    {backendHealth.queued} queued
+                  </Badge>
+                )}
+              </div>
+              <p className="text-[11px] text-[#4d5b85] dark:text-[#9da4b0] truncate">
+                {backendHealth.running_stage || "Processing..."}
+                {typeof backendHealth.running_progress === "number" ? ` (${backendHealth.running_progress}%)` : ""}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="secondary-gray"
+              size="sm"
+              onClick={() => router.push(`/jobs/${backendHealth.running}`)}
+            >
+              View Job
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              isLoading={stoppingActive}
+              onClick={handleStopRunning}
+            >
+              {stoppingActive ? "Stopping..." : "Stop Running Job"}
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Main Generator Form */}
       <form onSubmit={handleSubmit} id="studio-source">

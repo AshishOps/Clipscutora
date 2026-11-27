@@ -17,7 +17,7 @@ import {
   Lightning01,
   Loading01,
 } from "@untitledui/icons";
-import { getJobStatus, ClipResult } from "@/lib/api";
+import { getJobStatus, cancelJob, ClipResult } from "@/lib/api";
 import { formatDuration } from "@/lib/utils";
 import {
   Button,
@@ -38,6 +38,7 @@ export default function JobStatusPage() {
   const router = useRouter();
   const jobId = (params?.id as string) || "";
   const [copied, setCopied] = useState(false);
+  const [stopping, setStopping] = useState(false);
 
   const handleCopyLink = () => {
     if (typeof window !== "undefined") {
@@ -47,7 +48,7 @@ export default function JobStatusPage() {
     }
   };
 
-  const { data: job, isLoading, error } = useQuery({
+  const { data: job, isLoading, error, refetch } = useQuery({
     queryKey: ["jobStatus", jobId],
     queryFn: () => getJobStatus(jobId),
     enabled: !!jobId,
@@ -59,6 +60,19 @@ export default function JobStatusPage() {
       return 2500;
     },
   });
+
+  const handleStopJob = async (targetId: string) => {
+    if (!targetId || stopping) return;
+    setStopping(true);
+    try {
+      await cancelJob(targetId);
+      await refetch();
+    } catch (e) {
+      console.error("Failed to stop job:", e);
+    } finally {
+      setStopping(false);
+    }
+  };
 
   if (isLoading && !job) {
     return (
@@ -74,6 +88,7 @@ export default function JobStatusPage() {
   }
 
   if (error || job?.status === "failed") {
+    const wasStopped = job?.error === "Stopped by user";
     return (
       <div className="max-w-md mx-auto pt-6">
         <Card className="p-8 text-center space-y-5">
@@ -81,10 +96,10 @@ export default function JobStatusPage() {
             <AlertCircle className="w-7 h-7 stroke-[2]" />
           </div>
           <div className="space-y-1.5">
-            <h2 className="text-lg font-bold tracking-tight text-gray-900 dark:text-zinc-100">
-              Processing Pipeline Failed
+            <h2 className="text-lg font-bold tracking-tight text-[#0c1836] dark:text-white">
+              {wasStopped ? "Job Stopped" : "Processing Pipeline Failed"}
             </h2>
-            <p className="text-xs text-gray-500 dark:text-zinc-400 leading-relaxed">
+            <p className="text-xs text-[#4d5b85] dark:text-[#9da4b0] leading-relaxed">
               {job?.error || (error as any)?.message || "An unexpected error occurred during clipping."}
             </p>
           </div>
@@ -132,6 +147,17 @@ export default function JobStatusPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          {!isCompleted && (
+            <Button
+              variant="destructive"
+              size="sm"
+              isLoading={stopping}
+              onClick={() => handleStopJob(jobId)}
+            >
+              {stopping ? "Stopping..." : "Stop Job"}
+            </Button>
+          )}
+
           <Button
             variant="secondary-gray"
             size="sm"
@@ -158,15 +184,53 @@ export default function JobStatusPage() {
       {/* Progress Card when running */}
       {!isCompleted && (
         <Card className="p-6 sm:p-8 space-y-6 max-w-2xl mx-auto">
-          <div className="space-y-1">
-            <h2 className="text-base font-bold text-[#0c1836] dark:text-white flex items-center gap-2">
-              <Stars01 className="w-4 h-4 text-[#3b86ff] stroke-[2]" />
-              Generating Viral Shorts Pipeline
-            </h2>
-            <p className="text-xs text-[#4d5b85] dark:text-[#9da4b0] leading-relaxed">
-              Extracting speech, scoring virality, detecting speaker framing, and rendering dynamic 9:16 portrait video.
-            </p>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="space-y-1">
+              <h2 className="text-base font-bold text-[#0c1836] dark:text-white flex items-center gap-2">
+                <Stars01 className="w-4 h-4 text-[#3b86ff] stroke-[2]" />
+                Generating Viral Shorts Pipeline
+              </h2>
+              <p className="text-xs text-[#4d5b85] dark:text-[#9da4b0] leading-relaxed">
+                Extracting speech, scoring virality, detecting speaker framing, and rendering dynamic 9:16 portrait video.
+              </p>
+            </div>
+            <Button
+              variant="destructive"
+              size="sm"
+              isLoading={stopping}
+              onClick={() => handleStopJob(jobId)}
+            >
+              {stopping ? "Stopping..." : "Stop Job"}
+            </Button>
           </div>
+
+          {job?.running_job && job.running_job !== jobId && (
+            <div className="p-4 rounded-xl border border-amber-300/60 bg-amber-50 dark:border-amber-500/35 dark:bg-amber-950/30 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="text-amber-900 dark:text-amber-200">
+                <span className="font-semibold">Queued behind active job #{job.running_job}</span>
+                <span className="block text-[11px] opacity-80 mt-0.5">
+                  This job will start automatically as soon as job #{job.running_job} finishes or is stopped.
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="secondary-gray"
+                  size="sm"
+                  onClick={() => router.push(`/jobs/${job.running_job}`)}
+                >
+                  View #{job.running_job}
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  isLoading={stopping}
+                  onClick={() => handleStopJob(job.running_job!)}
+                >
+                  Stop #{job.running_job}
+                </Button>
+              </div>
+            </div>
+          )}
 
           <ProgressBar
             progress={job?.progress || 15}
