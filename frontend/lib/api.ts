@@ -13,6 +13,7 @@ export interface SubmitJobRequest {
   caption_glow?: string;
   caption_words?: string;
   caption_orientation?: "horizontal" | "vertical";
+  video_quality?: "720p" | "1080p" | "2k" | "4k";
   title_overlay?: boolean;
   hindi_quality?: "fast" | "best";
 }
@@ -64,6 +65,8 @@ export interface ClipResult {
   url: string;
   score: number;
   layout?: string;
+  quality?: string;
+  resolution?: string;
   title: string;
   hook_line: string;
   start: number;

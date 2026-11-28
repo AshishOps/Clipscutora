@@ -1,6 +1,7 @@
 """Configuration for the viral-clipper backend."""
 import os
 from pathlib import Path
+from typing import Optional, Dict, Any
 
 # ── Paths ──
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -81,6 +82,18 @@ OUTRO_SKIP_SEC = float(os.getenv("OUTRO_SKIP_SEC", "20"))   # ...or ending this 
 OUTPUT_WIDTH = 1080
 OUTPUT_HEIGHT = 1920
 FACE_SMOOTHING_ALPHA = 0.15  # EMA smoothing for face tracking
+
+VIDEO_QUALITIES = {
+    "720p":  {"width": 720,  "height": 1280, "max_src_h": 720,  "cq": 23, "audio_bitrate": "128k", "label": "720p"},
+    "1080p": {"width": 1080, "height": 1920, "max_src_h": 1080, "cq": 21, "audio_bitrate": "160k", "label": "1080p"},
+    "2k":    {"width": 1440, "height": 2560, "max_src_h": 1440, "cq": 19, "audio_bitrate": "192k", "label": "2K"},
+    "4k":    {"width": 2160, "height": 3840, "max_src_h": 2160, "cq": 18, "audio_bitrate": "256k", "label": "4K"},
+}
+
+
+def resolve_quality(quality: Optional[str] = None) -> Dict[str, Any]:
+    key = (quality or "1080p").strip().lower()
+    return VIDEO_QUALITIES.get(key, VIDEO_QUALITIES["1080p"])
 
 # ── Encoding ──
 # "auto" uses NVIDIA NVENC when available, else libx264. Or force "libx264" / "h264_nvenc".

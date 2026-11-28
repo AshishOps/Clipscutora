@@ -975,6 +975,19 @@ const ORIENTATION_MODES: { id: "horizontal" | "vertical"; label: string }[] = [
   { id: "vertical", label: "Vertical (Stacked)" },
 ];
 
+const VIDEO_QUALITY_OPTIONS: {
+  id: "720p" | "1080p" | "2k" | "4k";
+  label: string;
+  dims: string;
+  sub: string;
+  tag: string;
+}[] = [
+  { id: "720p", label: "720p HD", dims: "720×1280", sub: "Fast export", tag: "HD" },
+  { id: "1080p", label: "1080p Full HD", dims: "1080×1920", sub: "Standard Reels", tag: "FHD" },
+  { id: "2k", label: "2K QHD", dims: "1440×2560", sub: "1440p crisp", tag: "2K" },
+  { id: "4k", label: "4K Ultra HD", dims: "2160×3840", sub: "2160p max clarity", tag: "4K" },
+];
+
 const GLOW_LEVELS = [
   { id: "auto", label: "Style Default (Auto)" },
   { id: "off", label: "Off (No Halo)" },
@@ -1011,6 +1024,7 @@ export default function HomePage() {
   const [captionGlow, setCaptionGlow] = useState("auto");
   const [captionWords, setCaptionWords] = useState("auto");
   const [captionOrientation, setCaptionOrientation] = useState<"horizontal" | "vertical">("horizontal");
+  const [videoQuality, setVideoQuality] = useState<"720p" | "1080p" | "2k" | "4k">("1080p");
   const [language, setLanguage] = useState("auto");
   const [hindiQuality, setHindiQuality] = useState<"fast" | "best">("fast");
 
@@ -1127,6 +1141,7 @@ export default function HomePage() {
         caption_glow: captionGlow,
         caption_words: captionWords,
         caption_orientation: captionOrientation,
+        video_quality: videoQuality,
         title_overlay: titleOverlay,
         hindi_quality: hindiQuality,
       });
@@ -1568,6 +1583,28 @@ export default function HomePage() {
                     <span className="text-[#4d5b85] dark:text-[#9da4b0] text-[11px]">seconds (max 180s)</span>
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* Export Video Quality Selector */}
+            <div className="space-y-2.5 pt-2">
+              <div className="text-xs font-semibold text-[#0c1836] dark:text-[#f1f4f9] flex items-center justify-between">
+                <span>Export Video Quality</span>
+                <span className="font-mono text-[#3b86ff] font-bold">
+                  {VIDEO_QUALITY_OPTIONS.find((q) => q.id === videoQuality)?.dims}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                {VIDEO_QUALITY_OPTIONS.map((q) => (
+                  <SelectionCard
+                    key={q.id}
+                    title={q.label}
+                    description={`${q.dims} · ${q.sub}`}
+                    badge={<Badge variant="brand" size="sm">{q.tag}</Badge>}
+                    selected={videoQuality === q.id}
+                    onClick={() => setVideoQuality(q.id)}
+                  />
+                ))}
               </div>
             </div>
           </section>

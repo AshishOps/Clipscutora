@@ -20,6 +20,7 @@ const VALID_ANIMATIONS = new Set([
 const VALID_GLOWS = new Set(["auto", "off", "subtle", "medium", "intense"]);
 const VALID_WORD_MODES = new Set(["auto", "word", "short", "sentence"]);
 const VALID_ORIENTATIONS = new Set(["horizontal", "vertical"]);
+const VALID_QUALITIES = new Set(["720p", "1080p", "2k", "4k"]);
 
 export async function POST(req: NextRequest) {
   try {
@@ -39,6 +40,7 @@ export async function POST(req: NextRequest) {
       caption_glow,
       caption_words,
       caption_orientation,
+      video_quality,
       title_overlay,
       hindi_quality,
     } = body;
@@ -65,6 +67,9 @@ export async function POST(req: NextRequest) {
     const captionOrientation = VALID_ORIENTATIONS.has(String(caption_orientation || ""))
       ? String(caption_orientation)
       : "horizontal";
+    const videoQuality = VALID_QUALITIES.has(String(video_quality || "").toLowerCase())
+      ? String(video_quality).toLowerCase()
+      : "1080p";
 
     if (!source) {
       return NextResponse.json({ error: "Missing source video URL or path" }, { status: 400 });
@@ -86,6 +91,7 @@ export async function POST(req: NextRequest) {
       caption_glow: captionGlow,
       caption_words: captionWords,
       caption_orientation: captionOrientation,
+      video_quality: videoQuality,
       title_overlay: title_overlay !== false,
       hindi_quality: hindi_quality === "best" ? "best" : "fast",
       captions: captions !== false,

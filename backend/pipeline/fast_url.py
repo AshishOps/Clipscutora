@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 import config
-from .download import VideoMetadata, _extract_heatmap_data, _get_video_duration, _ytdlp, _YT_FORMAT
+from .download import VideoMetadata, _extract_heatmap_data, _get_video_duration, _ytdlp, yt_format_for_quality
 from .job_control import run_cancellable
 
 logger = logging.getLogger("viral_clipper.fast_url")
@@ -87,11 +87,12 @@ def _ffmpeg_audio_cut(src: Path, dst: Path, start: float, end: float) -> None:
 class ClipVideoFetcher:
     """Downloads just the video sections needed for each clip and aligns them to the job timeline."""
 
-    def __init__(self, url: str, job_dir: Path, offset: float, full_audio_wav: Path):
+    def __init__(self, url: str, job_dir: Path, offset: float, full_audio_wav: Path, video_quality: str = "1080p"):
         self.url = url
         self.job_dir = job_dir
         self.offset = offset  # job timeline -> original video timeline
         self.full_audio_wav = full_audio_wav
+        self.video_quality = video_quality
         self._urls: Optional[List[str]] = None
         self._url_lock = asyncio.Lock()
         self._audio: Optional[np.ndarray] = None
@@ -101,7 +102,8 @@ class ClipVideoFetcher:
     async def _stream_urls(self) -> List[str]:
         async with self._url_lock:
             if self._urls is None:
-                res = await asyncio.to_thread(_run, _ytdlp() + ["-g", "-f", _YT_FORMAT, "--no-playlist", self.url], 120)
+                fmt = yt_format_for_quality(self.video_quality)
+                res = await asyncio.to_thread(_run, _ytdlp() + ["-g", "-f", fmt, "--no-playlist", self.url], 120)
                 urls = [u for u in res.stdout.splitlines() if u.startswith("http")]
                 if res.returncode != 0 or not urls:
                     raise RuntimeError(f"Could not get stream URLs: {res.stderr.strip()[-300:]}")
@@ -130,7 +132,8 @@ class ClipVideoFetcher:
         req_start = max(0.0, clip_start - SECTION_PAD)  # job timeline
         dur = (clip_end - req_start) + SECTION_PAD
         abs_start = req_start + self.offset
-        out = self.job_dir / f"clipsrc_{idx:02d}.mp4"
+        # Matroska supports copy-muxing VP9/AV1/H264 + Opus/AAC cleanly (crucial for 2K/4K streams)
+        out = self.job_dir / f"clipsrc_{idx:02d}.mkv"
 
         cmd = ["ffmpeg", "-y", "-v", "error", "-ss", f"{abs_start:.3f}", "-i", urls[0]]
         if len(urls) > 1:
@@ -191,6 +194,6 @@ class ClipVideoFetcher:
                 end = None
                 if start is not None:
                     end = start + _get_video_duration(self.full_audio_wav)
-                meta = await download_video(self.url, self.job_dir / "full", start=start, end=end)
+                meta = await download_video(self.url, self.job_dir / "full", start=start, end=end, video_quality=self.video_quality)
                 self._full_video = meta.source_path
             return self._full_video

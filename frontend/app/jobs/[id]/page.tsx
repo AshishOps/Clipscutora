@@ -289,8 +289,13 @@ export default function JobStatusPage() {
                       </Badge>
                     </div>
 
-                    {/* Floating Duration & Layout Badges */}
+                    {/* Floating Duration, Quality & Layout Badges */}
                     <div className="absolute top-3 right-3 flex items-center gap-1.5 pointer-events-none">
+                      {(clip.quality || clip.resolution) && (
+                        <span className="px-2 py-0.5 rounded-full bg-[#3b86ff]/90 backdrop-blur-md text-[10px] font-bold text-white border border-white/15 shadow-xs">
+                          {clip.quality || clip.resolution}
+                        </span>
+                      )}
                       <span className="px-2 py-0.5 rounded-full bg-black/75 backdrop-blur-md text-[10px] font-medium text-white border border-white/10 shadow-xs">
                         {clip.layout === "split_cam"
                           ? "🎮 Split-Cam"

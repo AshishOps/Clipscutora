@@ -8,7 +8,7 @@ from typing import List, Dict, Any, Optional, Tuple
 import config
 from .score import RankedClip
 from .transcribe import TranscriptionResult
-from .reframe import reframe_clip, get_video_layout, _video_encoder_args, _detect_clip_layout
+from .reframe import reframe_clip, get_video_layout, _video_encoder_args, _detect_clip_layout, _source_dims
 from .caption import generate_captions
 
 logger = logging.getLogger("viral_clipper.export")
@@ -46,6 +46,7 @@ async def export_all_clips(
     caption_glow: str = "auto",
     caption_words: str = "auto",
     caption_orientation: str = "horizontal",
+    video_quality: str = "1080p",
 ) -> List[Dict[str, Any]]:
     """
     Optimized OpenShorts export pipeline:
@@ -55,14 +56,18 @@ async def export_all_clips(
     4. Run up to 2 clips concurrently to fully saturate multi-core CPUs/GPUs.
     """
     output_dir.mkdir(parents=True, exist_ok=True)
-    
+    q_spec = config.resolve_quality(video_quality)
+
     # 1. Video master layout detection (cached)
     if layout_info is None:
         layout_info = await asyncio.to_thread(get_video_layout, source_video)
-    _video_encoder_args()  # probe NVENC once, before the parallel workers start
+    _video_encoder_args(cq=q_spec["cq"], target_w=q_spec["width"], target_h=q_spec["height"])  # probe encoder once
     max_concurrency = max_concurrency or config.EXPORT_CONCURRENCY
     layout_type = layout_info.get("layout", "blurred_fit")
-    logger.info(f"Video master layout identified: '{layout_type}' (caption preset: '{caption_preset}')")
+    logger.info(
+        f"Video master layout identified: '{layout_type}' "
+        f"(caption preset: '{caption_preset}', quality: '{q_spec['label']}' {q_spec['width']}x{q_spec['height']})"
+    )
 
     # 2. Gather all words for subtitle slicing
     all_words = []
@@ -116,19 +121,22 @@ async def export_all_clips(
                     glow=caption_glow,
                     word_mode=caption_words,
                     orientation=caption_orientation,
+                    video_quality=video_quality,
                 )
                 subtitle_file = sub_target
 
             # Execute single-pass reframing + caption burn
-            logger.info(f"[{i}/{len(ranked_clips)}] Exporting (single-pass): {clip.title} ({clip.duration:.1f}s)...")
+            logger.info(f"[{i}/{len(ranked_clips)}] Exporting ({q_spec['label']} {q_spec['width']}x{q_spec['height']}): {clip.title} ({clip.duration:.1f}s)...")
             await reframe_clip(
                 video_path=clip_video,
                 start=v_start,
                 end=v_end,
                 output_path=final_target,
                 layout_info=clip_layout,
-                subtitle_path=subtitle_file
+                subtitle_path=subtitle_file,
+                video_quality=video_quality,
             )
+            out_w, out_h = await asyncio.to_thread(_source_dims, final_target)
 
             return {
                 "id": f"clip_{i:02d}",
@@ -137,6 +145,8 @@ async def export_all_clips(
                 "url": f"/output/{final_target.name}",
                 "score": clip.score,
                 "layout": clip_layout_type,
+                "quality": q_spec["label"],
+                "resolution": f"{out_w}x{out_h}",
                 "title": clip.title,
                 "hook_line": clip.hook_line,
                 "start": clip.start,

@@ -13,31 +13,33 @@ logger = logging.getLogger("viral_clipper.reframe")
 _ENCODER_CACHE: Dict[str, List[str]] = {}
 
 
-def split_cam_height() -> int:
+def split_cam_height(target_h: Optional[int] = None) -> int:
     """Height of the webcam band at the top of split-cam shorts (even number)."""
-    return (int(config.OUTPUT_HEIGHT * config.SPLIT_CAM_TOP_FRACTION) // 2) * 2
+    h = target_h or config.OUTPUT_HEIGHT
+    return (int(h * config.SPLIT_CAM_TOP_FRACTION) // 2) * 2
 
 
-def _video_encoder_args() -> List[str]:
-    """Pick the fastest working H.264 encoder: NVIDIA NVENC if usable, else libx264."""
-    if "args" in _ENCODER_CACHE:
-        return _ENCODER_CACHE["args"]
-    x264 = ["-c:v", "libx264", "-preset", "veryfast", "-crf", "22"]
-    nvenc = ["-c:v", "h264_nvenc", "-preset", "p4", "-tune", "hq", "-rc", "vbr", "-cq", "22", "-b:v", "0"]
+def _video_encoder_args(cq: int = 21, target_w: int = 1080, target_h: int = 1920) -> List[str]:
+    """Pick the fastest working H.264 encoder for this resolution: NVIDIA NVENC if usable, else libx264."""
+    cache_key = f"{cq}:{target_w}x{target_h}"
+    if cache_key in _ENCODER_CACHE:
+        return _ENCODER_CACHE[cache_key]
+    x264 = ["-c:v", "libx264", "-preset", "veryfast", "-crf", str(cq)]
+    nvenc = ["-c:v", "h264_nvenc", "-preset", "p4", "-tune", "hq", "-rc", "vbr", "-cq", str(cq), "-b:v", "0"]
     choice = config.VIDEO_ENCODER
     args = x264
     if choice in ("auto", "h264_nvenc"):
         test = subprocess.run(
             ["ffmpeg", "-hide_banner", "-loglevel", "error", "-f", "lavfi", "-i",
-             "color=black:s=256x256:d=0.2", *nvenc, "-f", "null", "-"],
+             f"color=black:s={target_w}x{target_h}:d=0.1", *nvenc, "-pix_fmt", "yuv420p", "-f", "null", "-"],
             capture_output=True, text=True, encoding="utf-8", errors="replace",
         )
         if test.returncode == 0:
             args = nvenc
         else:
-            logger.info("NVENC unavailable, using libx264.")
-    logger.info(f"Video encoder: {args[1]}")
-    _ENCODER_CACHE["args"] = args
+            logger.info(f"NVENC unavailable at {target_w}x{target_h}, using libx264 (CRF {cq}).")
+    logger.info(f"Video encoder ({target_w}x{target_h}, q={cq}): {args[1]}")
+    _ENCODER_CACHE[cache_key] = args
     return args
 
 
@@ -48,12 +50,16 @@ def _hwaccel_args() -> List[str]:
 
 
 PRESCALE_HEIGHT = 1080
-# 4K and other >1080p sources: decode AND shrink to 1080p on the GPU, then hand small frames to
-# the CPU filters (crop / blur / captions). About 2x faster than resizing 4K frames on the CPU.
 _GPU_PRESCALE_INPUT = ["-hwaccel", "cuda", "-hwaccel_output_format", "cuda"]
-_GPU_PRESCALE_CHAIN = f"scale_cuda=-2:{PRESCALE_HEIGHT}:format=nv12,hwdownload,format=nv12,"
-_GPU_PRESCALE_GRAPH = f"[0:v]scale_cuda=-2:{PRESCALE_HEIGHT}:format=nv12,hwdownload,format=nv12[src];"
 _DIMS_CACHE: Dict[str, Tuple[int, int]] = {}
+
+
+def _gpu_prescale_chain(prescale_h: int) -> str:
+    return f"scale_cuda=-2:{prescale_h}:format=nv12,hwdownload,format=nv12,"
+
+
+def _gpu_prescale_graph(prescale_h: int) -> str:
+    return f"[0:v]scale_cuda=-2:{prescale_h}:format=nv12,hwdownload,format=nv12[src];"
 
 
 def _source_dims(path: Path) -> Tuple[int, int]:
@@ -70,9 +76,9 @@ def _source_dims(path: Path) -> Tuple[int, int]:
     return _DIMS_CACHE[key]
 
 
-def _use_gpu_prescale(path: Path) -> bool:
+def _use_gpu_prescale(path: Path, max_src_h: int = PRESCALE_HEIGHT) -> bool:
     from .gpu import gpu_decode_ok
-    return _source_dims(path)[1] > PRESCALE_HEIGHT and gpu_decode_ok(path)
+    return _source_dims(path)[1] > max_src_h and gpu_decode_ok(path)
 
 
 def _strip_hwaccel(cmd: List[str]) -> List[str]:
@@ -88,13 +94,14 @@ def _strip_hwaccel(cmd: List[str]) -> List[str]:
     return out
 
 
-def _encode_args() -> List[str]:
+def _encode_args(q_spec: Optional[Dict[str, Any]] = None) -> List[str]:
+    spec = q_spec or config.resolve_quality("1080p")
     return [
         "-af", "loudnorm=I=-16:TP=-1.5:LRA=11",
-        *_video_encoder_args(),
+        *_video_encoder_args(cq=spec["cq"], target_w=spec["width"], target_h=spec["height"]),
         "-pix_fmt", "yuv420p",
         "-c:a", "aac",
-        "-b:a", "128k",
+        "-b:a", spec.get("audio_bitrate", "160k"),
         "-movflags", "+faststart",
     ]
 
@@ -298,30 +305,30 @@ def _build_split_cam_command(
     output_path: Path,
     subtitle_path: Optional[Path] = None,
     prescale: bool = False,
+    q_spec: Optional[Dict[str, Any]] = None,
 ) -> List[str]:
     """
-    Builds the streamer-shorts stacked 9:16 layout in a SINGLE PASS:
-    - Top (1080 x cam_h, ~40%): zoomed crop on the streamer's webcam (face first).
-    - Bottom (1080 x rest, ~60%): centered gameplay.
-    - Seam: thin dark divider; the title label sits just above it, captions just below it.
+    Builds the streamer-shorts stacked 9:16 layout in a SINGLE PASS at the chosen quality resolution.
     """
-    target_w = config.OUTPUT_WIDTH   # 1080
-    target_h = config.OUTPUT_HEIGHT  # 1920
-    cam_h = split_cam_height()       # 768 by default
-    game_h = target_h - cam_h        # 1152
+    spec = q_spec or config.resolve_quality("1080p")
+    target_w = spec["width"]
+    target_h = spec["height"]
+    prescale_h = spec["max_src_h"]
+    res_scale = target_w / 1080.0
+    cam_h = split_cam_height(target_h)
+    game_h = target_h - cam_h
     duration = max(1.0, end - start)
 
     cx, cy = webcam_info["webcam_center"]
     fw, fh = webcam_info["webcam_size"]
     src_w, src_h = webcam_info.get("src_size", (1920, 1080))
-    if prescale:  # frames arrive already shrunk to 1080p on the GPU
-        f = PRESCALE_HEIGHT / src_h
-        src_w, src_h = (int(src_w * f) // 2) * 2, PRESCALE_HEIGHT
+    if prescale and src_h > prescale_h:
+        f = prescale_h / src_h
+        src_w, src_h = (int(src_w * f) // 2) * 2, prescale_h
         fw, fh = fw * f, fh * f
 
     # Ensure all dimensions and offsets are EVEN numbers for H.264
-    # ~2.6 face-widths: frames the head and shoulders while staying inside the webcam inset
-    cam_box_w = (int(max(360, fw * 2.6)) // 2) * 2
+    cam_box_w = (int(max(src_w * 0.18, fw * 2.6)) // 2) * 2
     cam_box_h = (int(cam_box_w * (cam_h / target_w)) // 2) * 2
 
     cam_box_w = min(cam_box_w, (src_w // 2) * 2)
@@ -330,17 +337,17 @@ def _build_split_cam_command(
     px_cy = int(cy * src_h)
 
     cam_crop_x = (max(0, min(src_w - cam_box_w, px_cx - (cam_box_w // 2))) // 2) * 2
-    # Face slightly above centre, leaving room for the title label at the bottom of the cam
     cam_crop_y = (max(0, min(src_h - cam_box_h, px_cy - int(cam_box_h * 0.42))) // 2) * 2
+    bar_h = max(2, (int(round(4 * res_scale)) // 2) * 2)
 
     filter_complex = (
-        (_GPU_PRESCALE_GRAPH if prescale else "[0:v]null[src];") +
+        (_gpu_prescale_graph(prescale_h) if prescale else "[0:v]null[src];") +
         f"[src]split=2[v_cam][v_game];"
-        f"[v_cam]crop={cam_box_w}:{cam_box_h}:{cam_crop_x}:{cam_crop_y},scale={target_w}:{cam_h},setsar=1[top_cam];"
-        f"[v_game]scale={target_w}:{game_h}:force_original_aspect_ratio=increase,"
+        f"[v_cam]crop={cam_box_w}:{cam_box_h}:{cam_crop_x}:{cam_crop_y},scale={target_w}:{cam_h}:flags=lanczos,setsar=1[top_cam];"
+        f"[v_game]scale={target_w}:{game_h}:force_original_aspect_ratio=increase:flags=lanczos,"
         f"crop={target_w}:{game_h},setsar=1[bottom_game];"
         f"[top_cam][bottom_game]vstack=inputs=2[v_stacked];"
-        f"[v_stacked]drawbox=x=0:y={cam_h - 2}:w={target_w}:h=4:color=black@0.9:t=fill[v_boxed]"
+        f"[v_stacked]drawbox=x=0:y={cam_h - bar_h // 2}:w={target_w}:h={bar_h}:color=black@0.9:t=fill[v_boxed]"
     )
 
     if subtitle_path and subtitle_path.exists():
@@ -357,7 +364,7 @@ def _build_split_cam_command(
         "-filter_complex", filter_complex,
         "-map", "[outv]",
         "-map", "0:a?",
-        *_encode_args(),
+        *_encode_args(spec),
         str(output_path)
     ]
 
@@ -369,15 +376,18 @@ def _build_single_speaker_command(
     output_path: Path,
     subtitle_path: Optional[Path] = None,
     prescale: bool = False,
+    q_spec: Optional[Dict[str, Any]] = None,
 ) -> List[str]:
     """Single full-height 9:16 portrait crop tracking the speaker with single-pass caption burn."""
-    target_w = config.OUTPUT_WIDTH
-    target_h = config.OUTPUT_HEIGHT
+    spec = q_spec or config.resolve_quality("1080p")
+    target_w = spec["width"]
+    target_h = spec["height"]
+    prescale_h = spec["max_src_h"]
     duration = max(1.0, end - start)
 
-    filter_str = (_GPU_PRESCALE_CHAIN if prescale else "") + (
+    filter_str = (_gpu_prescale_chain(prescale_h) if prescale else "") + (
         f"crop='min(iw, ih*9/16)':ih:'min(max(0, iw*{mean_x:.3f} - (ih*9/32)), iw - min(iw, ih*9/16))':0,"
-        f"scale={target_w}:{target_h}"
+        f"scale={target_w}:{target_h}:flags=lanczos,setsar=1"
     )
 
     if subtitle_path and subtitle_path.exists():
@@ -390,7 +400,7 @@ def _build_single_speaker_command(
         "-i", str(source_video),
         "-t", str(duration),
         "-vf", filter_str,
-        *_encode_args(),
+        *_encode_args(spec),
         str(output_path)
     ]
 
@@ -401,18 +411,22 @@ def _build_blur_fallback_command(
     output_path: Path,
     subtitle_path: Optional[Path] = None,
     prescale: bool = False,
+    q_spec: Optional[Dict[str, Any]] = None,
 ) -> List[str]:
     """Center crop with stylish blurred background and single-pass caption burn."""
-    target_w = config.OUTPUT_WIDTH
-    target_h = config.OUTPUT_HEIGHT
+    spec = q_spec or config.resolve_quality("1080p")
+    target_w = spec["width"]
+    target_h = spec["height"]
+    prescale_h = spec["max_src_h"]
+    blur_r = max(12, int(round(20 * (target_w / 1080.0))))
     duration = max(1.0, end - start)
 
     filter_complex = (
-        (_GPU_PRESCALE_GRAPH if prescale else "[0:v]null[src];") +
+        (_gpu_prescale_graph(prescale_h) if prescale else "[0:v]null[src];") +
         f"[src]split=2[bg][fg];"
-        f"[bg]scale={target_w}:{target_h}:force_original_aspect_ratio=increase,crop={target_w}:{target_h},boxblur=20:5[bg_blur];"
-        f"[fg]scale={target_w}:-1:force_original_aspect_ratio=decrease[fg_scaled];"
-        f"[bg_blur][fg_scaled]overlay=(W-w)/2:(H-h)/2[v_overlay]"
+        f"[bg]scale={target_w}:{target_h}:force_original_aspect_ratio=increase:flags=lanczos,crop={target_w}:{target_h},setsar=1,boxblur={blur_r}:5[bg_blur];"
+        f"[fg]scale={target_w}:-1:force_original_aspect_ratio=decrease:flags=lanczos[fg_scaled];"
+        f"[bg_blur][fg_scaled]overlay=(W-w)/2:(H-h)/2,setsar=1[v_overlay]"
     )
 
     if subtitle_path and subtitle_path.exists():
@@ -429,7 +443,7 @@ def _build_blur_fallback_command(
         "-filter_complex", filter_complex,
         "-map", "[outv]",
         "-map", "0:a?",
-        *_encode_args(),
+        *_encode_args(spec),
         str(output_path)
     ]
 
@@ -439,13 +453,15 @@ async def reframe_clip(
     end: float,
     output_path: Path,
     layout_info: Optional[Dict[str, Any]] = None,
-    subtitle_path: Optional[Path] = None
+    subtitle_path: Optional[Path] = None,
+    video_quality: str = "1080p",
 ) -> Tuple[Path, str]:
     """
-    Cut, reframe to 9:16, and burn animated captions in a SINGLE pass.
+    Cut, reframe to 9:16, and burn animated captions in a SINGLE pass at the chosen quality.
     Returns (output_path, layout_type).
     """
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    q_spec = config.resolve_quality(video_quality)
 
     if layout_info is None:
         layout_info = get_video_layout(video_path)
@@ -454,13 +470,13 @@ async def reframe_clip(
 
     def build(prescale: bool) -> List[str]:
         if layout == "split_cam":
-            return _build_split_cam_command(video_path, start, end, layout_info, output_path, subtitle_path, prescale)
+            return _build_split_cam_command(video_path, start, end, layout_info, output_path, subtitle_path, prescale, q_spec)
         if layout == "single_speaker":
             return _build_single_speaker_command(video_path, start, end, layout_info.get("mean_x", 0.5),
-                                                 output_path, subtitle_path, prescale)
-        return _build_blur_fallback_command(video_path, start, end, output_path, subtitle_path, prescale)
+                                                 output_path, subtitle_path, prescale, q_spec)
+        return _build_blur_fallback_command(video_path, start, end, output_path, subtitle_path, prescale, q_spec)
 
-    prescale = _use_gpu_prescale(video_path)
+    prescale = _use_gpu_prescale(video_path, q_spec["max_src_h"])
     cmd = build(prescale)
 
     def _run(c: List[str]) -> subprocess.CompletedProcess:
@@ -478,7 +494,7 @@ async def reframe_clip(
         res = await asyncio.to_thread(_run, _strip_hwaccel(cmd))
     if res.returncode != 0:
         logger.warning(f"Single-pass layout ({layout}) failed ({res.stderr[-400:]}). Falling back to blur fit.")
-        fallback_cmd = _build_blur_fallback_command(video_path, start, end, output_path, subtitle_path)
+        fallback_cmd = _build_blur_fallback_command(video_path, start, end, output_path, subtitle_path, False, q_spec)
         res = await asyncio.to_thread(_run, _strip_hwaccel(fallback_cmd))
         if res.returncode != 0:
             raise RuntimeError(f"ffmpeg export failed: {res.stderr[-400:]}")

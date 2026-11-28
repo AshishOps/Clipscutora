@@ -97,9 +97,25 @@ def _ytdlp(for_download: bool = True) -> List[str]:
     return cmd
 
 
-# Prefer H.264 (the GPU can decode it; AV1 forces slow CPU decoding on RTX 20-series)
-_YT_FORMAT = ("bestvideo[ext=mp4][vcodec^=avc1][height<=1080]+bestaudio[ext=m4a]/"
-              "bestvideo[ext=mp4][height<=1080]+bestaudio[ext=m4a]/best[ext=mp4]/best")
+def yt_format_for_quality(video_quality: str = "1080p") -> str:
+    """Return a yt-dlp format selector targeting up to the requested quality.
+
+    YouTube serves 1440p (2K) and 2160p (4K) exclusively in VP9/AV1, so for >1080p
+    we do NOT restrict to avc1/mp4 first (otherwise yt-dlp would pick 1080p H.264).
+    """
+    max_h = config.resolve_quality(video_quality)["max_src_h"]
+    if max_h <= 1080:
+        return (
+            f"bestvideo[ext=mp4][vcodec^=avc1][height<={max_h}]+bestaudio[ext=m4a]/"
+            f"bestvideo[height<={max_h}]+bestaudio/best[height<={max_h}]/best"
+        )
+    return (
+        f"bestvideo[height<={max_h}]+bestaudio[ext=m4a]/"
+        f"bestvideo[height<={max_h}]+bestaudio/best[height<={max_h}]/best"
+    )
+
+
+_YT_FORMAT = yt_format_for_quality("1080p")
 
 
 def _is_url(source: str) -> bool:
@@ -157,10 +173,11 @@ def _ffmpeg_cut(src: Path, dst: Path, start: float, end: float) -> None:
         raise RuntimeError(f"Could not cut the selected range: {res.stderr[-300:]}")
 
 
-def _record_live(url: str, job_dir: Path, minutes: float) -> Path:
+def _record_live(url: str, job_dir: Path, minutes: float, video_quality: str = "1080p") -> Path:
     """Record the next `minutes` of a live stream (YouTube / Twitch / any HLS live)."""
+    max_h = config.resolve_quality(video_quality)["max_src_h"]
     res = run_cancellable(
-        _ytdlp() + ["-g", "-f", "bestvideo[height<=1080][protocol*=m3u8]+bestaudio[protocol*=m3u8]/best[height<=1080][protocol*=m3u8]/best[height<=1080]/best", url],
+        _ytdlp() + ["-g", "-f", f"bestvideo[height<={max_h}][protocol*=m3u8]+bestaudio[protocol*=m3u8]/best[height<={max_h}][protocol*=m3u8]/best[height<={max_h}]/best", url],
         text=True, encoding="utf-8", errors="replace", timeout=120,
     )
     stream_urls = [u for u in res.stdout.splitlines() if u.startswith("http")]
@@ -185,6 +202,7 @@ async def download_video(
     start: Optional[float] = None,
     end: Optional[float] = None,
     live_minutes: Optional[float] = None,
+    video_quality: str = "1080p",
 ) -> VideoMetadata:
     """Fetch the source (URL, live stream, or local file), optionally only the [start, end] range.
     Returned timestamps are relative to the fetched part; `offset` maps them back."""
@@ -216,21 +234,24 @@ async def download_video(
     except Exception as e:
         logger.warning(f"Could not pre-read video info ({e}); downloading anyway.")
     if info.get("is_live") or info.get("live_status") == "is_live":
-        path = await asyncio.to_thread(_record_live, source, job_dir, live_minutes or 10)
+        path = await asyncio.to_thread(_record_live, source, job_dir, live_minutes or 10, video_quality)
         meta = VideoMetadata(source_path=path, title=info.get("title", "Live stream"),
                              duration=_get_video_duration(path), url=source)
         meta.offset = 0.0
         return meta
 
     # ── Normal video / finished stream (optionally just a section) ──
+    q_spec = config.resolve_quality(video_quality)
+    merge_fmt = "mkv" if q_spec["max_src_h"] > 1080 else "mp4"
+    max_dl_size = "12G" if q_spec["max_src_h"] > 1080 else "4G"
     output_template = str(job_dir / "source.%(ext)s")
     cmd = _ytdlp() + [
-        "--format", _YT_FORMAT,
-        "--merge-output-format", "mp4",
+        "--format", yt_format_for_quality(video_quality),
+        "--merge-output-format", merge_fmt,
         "--write-info-json",
         "--concurrent-fragments", "8",
         "--no-playlist",
-        "--max-filesize", "4G",
+        "--max-filesize", max_dl_size,
         "--output", output_template,
     ]
     # Section download (ffmpeg over HTTP) is slow; for videos under ~30 min it's faster to

@@ -74,6 +74,7 @@ class JobRequest(BaseModel):
     caption_glow: str = "auto"
     caption_words: str = "auto"
     caption_orientation: str = "horizontal"
+    video_quality: str = "1080p"
     title_overlay: bool = True
     hindi_quality: str = "fast"
     webhook_url: Optional[str] = None
@@ -119,6 +120,7 @@ async def run_pipeline(
     caption_glow: str = "auto",
     caption_words: str = "auto",
     caption_orientation: str = "horizontal",
+    video_quality: str = "1080p",
     title_overlay: bool = True,
     hindi_quality: str = "fast",
 ) -> Dict[str, Any]:
@@ -168,7 +170,7 @@ async def run_pipeline(
                 audio_first = False
         if metadata is None:
             metadata = await download_video(source, job_dir, start=range_start, end=range_end,
-                                            live_minutes=live_minutes)
+                                            live_minutes=live_minutes, video_quality=video_quality)
         if not metadata.duration or metadata.duration < 1:
             raise RuntimeError(
                 "The download came back empty, so there is nothing to clip. If this is a live stream "
@@ -223,7 +225,7 @@ async def run_pipeline(
         clip_source = None
         if audio_first:
             from pipeline.fast_url import ClipVideoFetcher
-            clip_source = ClipVideoFetcher(source, job_dir, metadata.offset, job_dir / "audio.wav").get
+            clip_source = ClipVideoFetcher(source, job_dir, metadata.offset, job_dir / "audio.wav", video_quality=video_quality).get
         clips = await export_all_clips(
             ranked_clips=ranked,
             source_video=metadata.source_path,
@@ -238,6 +240,7 @@ async def run_pipeline(
             caption_glow=caption_glow,
             caption_words=caption_words,
             caption_orientation=caption_orientation,
+            video_quality=video_quality,
             title_overlay=bool(title_overlay) and config.TITLE_OVERLAY,
             clip_source=clip_source,
         )
@@ -323,6 +326,8 @@ if __name__ == "__main__":
                         help="Caption multi-layer glow intensity")
     parser.add_argument("--hindi-quality", choices=["fast", "best"], default="fast",
                         help="Hindi captions: fast (turbo) or best (large-v3, ~4x slower transcription)")
+    parser.add_argument("--quality", choices=["720p", "1080p", "2k", "4k"], default="1080p",
+                        help="Export video resolution: 720p, 1080p, 2k (1440p), or 4k (2160p)")
     parser.add_argument("--no-captions", action="store_true", help="Disable burned-in captions")
     from pipeline.caption import CAPTION_STYLES, STYLE_ALIASES
     parser.add_argument("--preset", "--style", dest="preset", type=str, default=config.DEFAULT_CAPTION_STYLE,
@@ -361,6 +366,7 @@ if __name__ == "__main__":
         caption_glow=args.glow,
         title_overlay=not args.no_title,
         hindi_quality=args.hindi_quality,
+        video_quality=args.quality,
     ))
 
     if res["status"] == "completed":

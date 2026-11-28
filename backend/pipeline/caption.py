@@ -372,7 +372,9 @@ def _clean_title(title: str) -> str:
     return _escape_ass_text(text)
 
 
-def _build_entrance_tags(anim: str, cx: int, cy: int, pop: int, is_block_start: bool) -> str:
+def _build_entrance_tags(
+    anim: str, cx: int, cy: int, pop: int, is_block_start: bool, res_scale: float = 1.0
+) -> str:
     """Build ASS entrance tags for the block start or individual word event."""
     if anim == "none" or not anim:
         return f"\\an5\\pos({cx},{cy})"
@@ -381,25 +383,28 @@ def _build_entrance_tags(anim: str, cx: int, cy: int, pop: int, is_block_start: 
         # Keep multi-word line anchored so words don't re-slide mid-line
         return f"\\an5\\pos({cx},{cy})"
 
+    def px(n: int) -> int:
+        return max(2, int(round(n * res_scale)))
+
     if anim == "bounce-drop":
         return (
-            f"\\an5\\move({cx},{cy - 38},{cx},{cy},0,145)\\fad(45,0)"
+            f"\\an5\\move({cx},{cy - px(38)},{cx},{cy},0,145)\\fad(45,0)"
             f"\\fscx90\\fscy90\\t(0,115,\\fscx{max(108, pop)}\\fscy{max(108, pop)})"
             f"\\t(115,210,\\fscx100\\fscy100)"
         )
     if anim == "word-by-word":
-        return f"\\an5\\move({cx},{cy + 36},{cx},{cy},0,150)\\fad(65,0)"
+        return f"\\an5\\move({cx},{cy + px(36)},{cx},{cy},0,150)\\fad(65,0)"
     if anim == "word-wave":
-        return f"\\an5\\move({cx},{cy + 42},{cx},{cy},0,165)\\blur10\\fad(50,0)\\t(0,165,\\blur0)"
+        return f"\\an5\\move({cx},{cy + px(42)},{cx},{cy},0,165)\\blur{px(10)}\\fad(50,0)\\t(0,165,\\blur0)"
     if anim == "blur-in":
-        return f"\\an5\\pos({cx},{cy})\\blur16\\alpha&H99&\\t(0,150,\\blur0\\alpha&H00&)"
+        return f"\\an5\\pos({cx},{cy})\\blur{px(16)}\\alpha&H99&\\t(0,150,\\blur0\\alpha&H00&)"
     if anim == "soft-rise":
-        return f"\\an5\\move({cx},{cy + 24},{cx},{cy},0,160)\\blur8\\fad(60,0)\\t(0,160,\\blur0)"
+        return f"\\an5\\move({cx},{cy + px(24)},{cx},{cy},0,160)\\blur{px(8)}\\fad(60,0)\\t(0,160,\\blur0)"
     if anim == "drift-right":
-        return f"\\an5\\move({cx - 38},{cy},{cx},{cy},0,150)\\blur6\\fad(50,0)\\t(0,150,\\blur0)"
+        return f"\\an5\\move({cx - px(38)},{cy},{cx},{cy},0,150)\\blur{px(6)}\\fad(50,0)\\t(0,150,\\blur0)"
     if anim == "focus-settle":
         return (
-            f"\\an5\\pos({cx},{cy})\\fscx124\\fscy124\\blur8\\fad(40,0)"
+            f"\\an5\\pos({cx},{cy})\\fscx124\\fscy124\\blur{px(8)}\\fad(40,0)"
             f"\\t(0,155,\\fscx100\\fscy100\\blur0)"
         )
     if anim == "flicker-in":
@@ -425,8 +430,9 @@ async def generate_captions(
     glow: Optional[str] = None,
     word_mode: Optional[str] = None,
     orientation: Optional[str] = None,
+    video_quality: str = "1080p",
 ) -> Path:
-    """Write an ASS subtitle file with animated word captions and optional multi-layer glow."""
+    """Write an ASS subtitle file scaled natively for 720p, 1080p, 2K, or 4K portrait video."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
     style_name = resolve_style(preset)
     st = dict(CAPTION_STYLES[style_name])
@@ -456,7 +462,9 @@ async def generate_captions(
         hex_src = _ass_to_hex(st.get("active", st["text"]))
         glow_cfg = dict(color=hex_src, strength=65, blur=18)
 
-    W, H = config.OUTPUT_WIDTH, config.OUTPUT_HEIGHT
+    q_spec = config.resolve_quality(video_quality)
+    W, H = q_spec["width"], q_spec["height"]
+    res_scale = W / 1080.0
     clip_dur = max(0.1, clip_end - clip_start)
 
     # 1. Words inside the clip, relative timestamps
@@ -471,18 +479,18 @@ async def generate_captions(
                 )
     clean_words = _merge_continuation_words(raw_clip_words)
 
-    # 2. Geometry — stroke-free text for BorderStyle=1 (preserve BorderStyle=3 box padding)
-    scale = config.CAPTION_SIZE_SCALE
+    # 2. Geometry — scaled natively to W x H (720p / 1080p / 2K / 4K), stroke-free for BorderStyle=1
+    scale = config.CAPTION_SIZE_SCALE * res_scale
     size = int(round(st["size"] * scale))
     if st.get("border_style", 1) == 1:
         border = 0.0
         shadow_depth = min(int(st.get("shadow", 1)), 1)
     else:
-        border = st.get("border", 14)
+        border = round(st.get("border", 14) * res_scale, 1)
         shadow_depth = st.get("shadow", 0)
     split = layout_type == "split_cam"
     cy = int(H * (config.CAPTION_Y_SPLIT if split else config.CAPTION_Y_DEFAULT))
-    avail_w = W - 100
+    avail_w = W - int(round(100 * res_scale))
     pop = st.get("pop", 100)
 
     def est_width(words: List[str], fs: int) -> float:
@@ -526,6 +534,9 @@ async def generate_captions(
         primary, secondary = st["text"], st.get("active", st["text"])
 
     title_size = int(round(54 * scale))
+    t_bord = max(4, int(round(14 * res_scale)))
+    t_marg = int(round(90 * res_scale))
+    d_marg = int(round(60 * res_scale))
     header = f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: {W}
@@ -535,8 +546,8 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,{st['font']},{size},{primary},{secondary},{st['outline']},{st['back']},1,0,0,0,100,100,0,0,{st.get('border_style', 1)},{border},{shadow_depth},5,60,60,0,1
-Style: Title,Arial Black,{title_size},{WHITE},{WHITE},{_rgb('000000', 0x10)},{_rgb('000000', 0x10)},1,0,0,0,100,100,0,0,3,14,0,2,90,90,0,1
+Style: Default,{st['font']},{size},{primary},{secondary},{st['outline']},{st['back']},1,0,0,0,100,100,0,0,{st.get('border_style', 1)},{border},{shadow_depth},5,{d_marg},{d_marg},0,1
+Style: Title,Arial Black,{title_size},{WHITE},{WHITE},{_rgb('000000', 0x10)},{_rgb('000000', 0x10)},1,0,0,0,100,100,0,0,3,{t_bord},0,2,{t_marg},{t_marg},0,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -640,7 +651,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     if clean_title:
         if split:
             from .reframe import split_cam_height
-            pos = f"\\an2\\pos({W // 2},{split_cam_height() - 30})"
+            pos = f"\\an2\\pos({W // 2},{split_cam_height(H) - int(round(30 * res_scale))})"
         else:
             pos = f"\\an8\\pos({W // 2},{int(H * 0.12)})"
         tfn = _font_override(clean_title, int(title_size * 1.1))
@@ -710,7 +721,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 fn = _font_override(texts[i], int(fs * 1.12))
                 parts.append(f"{{\\kf{dur_cs}{fn}}}{texts[i]}" + (reset if fn else ""))
             ev_s, ev_e = block[0].start, max(block[0].start + 0.2, min(block[-1].end + 0.3, next_start))
-            ent = _build_entrance_tags(anim_mode, W // 2, cy, pop, True) + line_tags
+            ent = _build_entrance_tags(anim_mode, W // 2, cy, pop, True, res_scale) + line_tags
             karaoke_body = (" ".join(parts[:wrap_mid]) + "\\N" + " ".join(parts[wrap_mid:])) if wrap_mid else " ".join(parts)
             emit_with_glow(ev_s, ev_e, ent, karaoke_body)
             continue
@@ -745,7 +756,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             for i, w in enumerate(block):
                 ev_s = block[0].start if i == 0 else w.start
                 ev_e = word_end(i)
-                ent = _build_entrance_tags(anim_mode, W // 2, cy, pop, i == 0) + line_tags
+                ent = _build_entrance_tags(anim_mode, W // 2, cy, pop, i == 0, res_scale) + line_tags
 
                 def make_row_token(j: int, is_row2: bool) -> Dict[str, Any]:
                     fn = _font_override(r_texts[j], int(fs * 1.12))
@@ -788,11 +799,11 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         if effective_mode == "splash_hero":
             hero_font = st.get("hero_font", st["font"])
             hero_fs = int(fs * (1.28 if orient == "horizontal" else st.get("hero_scale", 1.5)))
-            support_fs = max(18, int(fs * (0.85 if orient == "horizontal" else 0.72)))
+            support_fs = max(int(round(18 * res_scale)), int(fs * (0.85 if orient == "horizontal" else 0.72)))
             for i, w in enumerate(block):
                 ev_s = block[0].start if i == 0 else w.start
                 ev_e = word_end(i)
-                ent = _build_entrance_tags(anim_mode, W // 2, cy, pop, i == 0) + line_tags
+                ent = _build_entrance_tags(anim_mode, W // 2, cy, pop, i == 0, res_scale) + line_tags
                 rows_out = []
 
                 def make_support(j: int) -> Dict[str, Any]:
@@ -842,7 +853,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         for i, w in enumerate(block):
             ev_s = block[0].start if i == 0 else w.start
             ev_e = word_end(i)
-            ent = _build_entrance_tags(anim_mode, W // 2, cy, pop, i == 0 or effective_mode == "single") + line_tags
+            ent = _build_entrance_tags(anim_mode, W // 2, cy, pop, i == 0 or effective_mode == "single", res_scale) + line_tags
 
             if effective_mode == "single":
                 color = palette[word_counter % len(palette)] if palette else st["text"]
