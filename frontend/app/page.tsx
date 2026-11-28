@@ -613,6 +613,7 @@ function CaptionStylePreview({
   overrideAnimation,
   overrideGlow,
   overrideWords = "auto",
+  overrideOrientation = "horizontal",
   interactive = false,
 }: {
   spec: CaptionStyleSpec;
@@ -620,6 +621,7 @@ function CaptionStylePreview({
   overrideAnimation: string;
   overrideGlow: string;
   overrideWords?: string;
+  overrideOrientation?: "horizontal" | "vertical";
   interactive?: boolean;
 }) {
   const [stepIdx, setStepIdx] = useState(0);
@@ -630,7 +632,7 @@ function CaptionStylePreview({
       setStepIdx((n) => (n + 1) % 6);
     }, 680);
     return () => clearInterval(id);
-  }, [interactive, spec.id, overrideWords]);
+  }, [interactive, spec.id, overrideWords, overrideOrientation]);
 
   const chosenFont = overrideFont ? FONTS.find((f) => f.id === overrideFont) : undefined;
   const effectiveFont = chosenFont?.css && chosenFont.css !== "inherit" ? chosenFont.css : spec.fontFamily;
@@ -654,13 +656,6 @@ function CaptionStylePreview({
 
   const buildShadow = (glowHex?: string, blurPx?: number, isActive?: boolean) => {
     const parts: string[] = [];
-    if (spec.shadowOffsetPx > 0) {
-      const so = Math.min(spec.shadowOffsetPx, 1.5);
-      parts.push(`${so}px ${so}px 0px rgba(0,0,0,0.88)`);
-    }
-    if (!glowHex && spec.strokePx === 0 && spec.shadowOffsetPx > 0) {
-      parts.push(`0 2px 8px rgba(0,0,0,0.75)`);
-    }
     if (glowHex && blurPx && glowMult > 0) {
       const r1 = Math.round(blurPx * 0.45 * glowMult * sizeScale);
       const r2 = Math.round(blurPx * glowMult * sizeScale);
@@ -670,6 +665,8 @@ function CaptionStylePreview({
       if (isActive || glowMult >= 1.2) {
         parts.push(`0 0 ${r3}px ${glowHex}`);
       }
+    } else if (spec.shadowOffsetPx > 0) {
+      parts.push(`0 2px 6px rgba(0,0,0,0.65)`);
     }
     return parts.length ? parts.join(", ") : undefined;
   };
@@ -709,10 +706,6 @@ function CaptionStylePreview({
   })();
 
   const activeWordPos = interactive && previewWords.length > 0 ? stepIdx % previewWords.length : -1;
-  const strokeCss =
-    spec.strokePx > 0 && spec.outlineColor !== "transparent"
-      ? `1px ${spec.outlineColor}`
-      : undefined;
 
   const wordStyle = (w?: StyleWord, customGlow?: string, isCurrentlySpoken?: boolean): React.CSSProperties => {
     const active = interactive ? !!isCurrentlySpoken : !!w?.active;
@@ -743,7 +736,8 @@ function CaptionStylePreview({
       (portugalEmphasis ? 900 : heroWord || !interactive ? w?.fontWeight ?? effectiveWeight : effectiveWeight);
     const wItalic = chosenFont?.italic ?? (portugalEmphasis ? true : heroWord || !interactive ? w?.italic ?? effectiveItalic : effectiveItalic);
     const wScale = portugalEmphasis ? 1.24 : heroWord ? w?.scale ?? 1.5 : !interactive ? w?.scale ?? 1 : 1;
-    const fs = Math.round(spec.fontSizePx * wScale * sizeScale);
+    const horizShrink = overrideOrientation === "horizontal" && previewWords.length >= 4 ? 0.78 : 1;
+    const fs = Math.round(spec.fontSizePx * wScale * horizShrink * sizeScale);
 
     return {
       fontFamily: wFont,
@@ -752,7 +746,6 @@ function CaptionStylePreview({
       fontSize: `${fs}px`,
       lineHeight: 1.05,
       color: renderedColor,
-      WebkitTextStroke: strokeCss,
       textShadow: buildShadow(
         matchedGlow,
         fallbackBlur,
@@ -791,7 +784,7 @@ function CaptionStylePreview({
           return (
             <span
               key={interactive ? `wbw-${spec.id}-${stepIdx}` : spec.id}
-              className={`relative z-10 caption-stroke ${spec.upper || spec.row2?.upper ? "uppercase" : spec.lower ? "lowercase" : ""} ${animClass}`}
+              className={`relative z-10 ${spec.upper || spec.row2?.upper ? "uppercase" : spec.lower ? "lowercase" : ""} ${animClass}`}
               style={{
                 fontFamily: chosenFont?.css && chosenFont.css !== "inherit" ? chosenFont.css : (spec.row2?.fontFamily || effectiveFont),
                 fontWeight: chosenFont?.weight ?? (spec.row2?.fontWeight ?? effectiveWeight),
@@ -799,7 +792,6 @@ function CaptionStylePreview({
                 fontSize: `${Math.round(spec.fontSizePx * 1.15 * sizeScale)}px`,
                 lineHeight: 1.02,
                 color: wColor,
-                WebkitTextStroke: strokeCss,
                 textShadow: buildShadow(wGlow, fallbackBlur, true),
                 backgroundColor: spec.boxBg,
                 borderRadius: spec.boxRounded,
@@ -812,6 +804,7 @@ function CaptionStylePreview({
         })()
       ) : spec.mode === "two_line" && spec.row1 && spec.row2 ? (
         (() => {
+          const isHoriz = overrideOrientation === "horizontal";
           const splitAt = overrideWords === "sentence" ? 2 : spec.row1.text.split(/\s+/).length;
           const r1Text = overrideWords === "sentence"
             ? previewWords.slice(0, splitAt).map((x) => x.text).join(" ")
@@ -819,35 +812,36 @@ function CaptionStylePreview({
           const r2Text = overrideWords === "sentence"
             ? previewWords.slice(splitAt).map((x) => x.text).join(" ")
             : spec.row2.text;
+          const horizScale = isHoriz ? (overrideWords === "sentence" ? 0.66 : 0.78) : (overrideWords === "sentence" ? 0.86 : 1);
           return (
             <div
               key={interactive ? `${spec.id}-${effectiveAnim === "word-by-word" ? stepIdx : Math.floor(stepIdx / 3)}` : spec.id}
-              className="relative z-10 flex flex-col items-center justify-center leading-none gap-0.5 text-center"
+              className={`relative z-10 flex items-baseline justify-center text-center ${
+                isHoriz ? "flex-row flex-nowrap whitespace-nowrap gap-1.5" : "flex-col items-center leading-none gap-0.5"
+              }`}
             >
               <span
-                className={`caption-stroke tracking-tight ${spec.row1.upper ? "uppercase" : ""}`}
+                className={`tracking-tight ${spec.row1.upper ? "uppercase" : ""}`}
                 style={{
                   fontFamily: chosenFont?.css && chosenFont.css !== "inherit" ? chosenFont.css : spec.row1.fontFamily,
                   fontWeight: spec.row1.fontWeight,
                   fontStyle: spec.row1.italic ? "italic" : "normal",
-                  fontSize: `${Math.round(spec.fontSizePx * (spec.row1.scale ?? 0.85) * (overrideWords === "sentence" ? 0.86 : 1) * sizeScale)}px`,
+                  fontSize: `${Math.round(spec.fontSizePx * (spec.row1.scale ?? 0.85) * horizScale * sizeScale)}px`,
                   color: spec.row1.color,
-                  WebkitTextStroke: strokeCss,
                   textShadow: buildShadow(spec.row1.glowColor, fallbackBlur ? fallbackBlur * 0.75 : undefined, false),
                 }}
               >
                 {r1Text}
               </span>
               <span
-                className={`caption-stroke tracking-wide ${spec.row2.upper ? "uppercase" : ""} ${animClass}`}
+                className={`tracking-wide ${spec.row2.upper ? "uppercase" : ""} ${animClass}`}
                 style={{
                   fontFamily: chosenFont?.css && chosenFont.css !== "inherit" ? chosenFont.css : spec.row2.fontFamily,
                   fontWeight: spec.row2.fontWeight,
                   fontStyle: spec.row2.italic ? "italic" : "normal",
-                  fontSize: `${Math.round(spec.fontSizePx * (overrideWords === "sentence" ? 0.86 : 1) * sizeScale)}px`,
+                  fontSize: `${Math.round(spec.fontSizePx * horizScale * sizeScale)}px`,
                   lineHeight: 0.98,
                   color: spec.row2.color,
-                  WebkitTextStroke: strokeCss,
                   textShadow: buildShadow(spec.row2.glowColor ?? fallbackGlow, fallbackBlur, true),
                 }}
               >
@@ -857,16 +851,24 @@ function CaptionStylePreview({
           );
         })()
       ) : spec.mode === "splash_hero" ? (
-        <div className="relative z-10 flex flex-col items-center justify-center leading-none text-center">
+        <div
+          className={`relative z-10 flex items-center justify-center text-center ${
+            overrideOrientation === "horizontal"
+              ? "flex-row flex-nowrap whitespace-nowrap items-baseline gap-1.5"
+              : "flex-col leading-none"
+          }`}
+        >
           {(overrideWords === "sentence" ? previewWords : spec.words).map((w, idx) => {
             const isHero = interactive ? idx === activeWordPos : !!w.hero;
             return (
               <span
                 key={idx}
-                className={`caption-stroke ${isHero ? animClass : ""}`}
+                className={isHero ? animClass : ""}
                 style={{
                   ...wordStyle(w, isHero ? fallbackGlow : undefined, isHero),
-                  fontSize: overrideWords === "sentence"
+                  fontSize: overrideOrientation === "horizontal"
+                    ? `${Math.round(spec.fontSizePx * (isHero ? 1.18 : 0.82) * (overrideWords === "sentence" ? 0.75 : 0.92) * sizeScale)}px`
+                    : overrideWords === "sentence"
                     ? `${Math.round(spec.fontSizePx * (isHero ? 1.25 : 0.78) * sizeScale)}px`
                     : wordStyle(w, isHero ? fallbackGlow : undefined, isHero).fontSize,
                   textTransform: isHero && (spec.id === "business" || spec.id === "aura_glow")
@@ -874,7 +876,7 @@ function CaptionStylePreview({
                     : isHero && spec.id === "trading_bro"
                     ? "lowercase"
                     : undefined,
-                  marginTop: idx > 0 ? (isHero ? "-1px" : "-2px") : undefined,
+                  marginTop: overrideOrientation === "vertical" && idx > 0 ? (isHero ? "-1px" : "-2px") : undefined,
                   zIndex: isHero ? 2 : 1,
                 }}
               >
@@ -885,13 +887,13 @@ function CaptionStylePreview({
         </div>
       ) : spec.mode === "karaoke" ? (
         <div
-          className={`relative z-10 inline-flex items-center gap-1.5 ${spec.upper ? "uppercase" : ""} ${animClass}`}
+          className={`relative z-10 inline-flex items-center gap-1.5 whitespace-nowrap ${spec.upper ? "uppercase" : ""} ${animClass}`}
         >
           {(() => {
             const phrase = previewWords.map((x) => x.text).join(" ");
             return (
               <span className="relative inline-block">
-                <span className="caption-stroke" style={wordStyle({ text: phrase })}>
+                <span style={wordStyle({ text: phrase })}>
                   {phrase}
                 </span>
                 <span
@@ -900,7 +902,7 @@ function CaptionStylePreview({
                   style={{
                     fontFamily: effectiveFont,
                     fontWeight: effectiveWeight,
-                    fontSize: `${Math.round(spec.fontSizePx * sizeScale)}px`,
+                    fontSize: wordStyle({ text: phrase }).fontSize,
                     lineHeight: 1.05,
                   }}
                 >
@@ -912,9 +914,9 @@ function CaptionStylePreview({
         </div>
       ) : (
         <div
-          className={`relative z-10 flex items-center justify-center flex-wrap gap-x-2 gap-y-0.5 ${
-            spec.upper ? "uppercase" : spec.lower ? "lowercase" : ""
-          }`}
+          className={`relative z-10 flex items-center justify-center gap-x-2 gap-y-0.5 ${
+            overrideOrientation === "horizontal" ? "flex-nowrap whitespace-nowrap" : "flex-wrap"
+          } ${spec.upper ? "uppercase" : spec.lower ? "lowercase" : ""}`}
           style={{
             backgroundColor: spec.boxBg,
             borderRadius: spec.boxRounded,
@@ -928,12 +930,9 @@ function CaptionStylePreview({
             return (
               <span
                 key={idx}
-                className={`caption-stroke ${isSpoken || effectiveAnim === "word-wave" ? animClass : ""}`}
+                className={isSpoken || effectiveAnim === "word-wave" ? animClass : ""}
                 style={{
                   ...wordStyle(w, isSpoken ? fallbackGlow : undefined, isSpoken),
-                  fontSize: overrideWords === "sentence"
-                    ? `${Math.round(spec.fontSizePx * 0.86 * sizeScale)}px`
-                    : wordStyle(w, isSpoken ? fallbackGlow : undefined, isSpoken).fontSize,
                   animationDelay:
                     effectiveAnim === "word-wave"
                       ? `${idx * 160}ms`
@@ -971,6 +970,11 @@ const WORD_MODES = [
   { id: "sentence", label: "4-5 Words Sentence" },
 ];
 
+const ORIENTATION_MODES: { id: "horizontal" | "vertical"; label: string }[] = [
+  { id: "horizontal", label: "Horizontal (Single Line)" },
+  { id: "vertical", label: "Vertical (Stacked)" },
+];
+
 const GLOW_LEVELS = [
   { id: "auto", label: "Style Default (Auto)" },
   { id: "off", label: "Off (No Halo)" },
@@ -1006,6 +1010,7 @@ export default function HomePage() {
   const [captionAnimation, setCaptionAnimation] = useState("auto");
   const [captionGlow, setCaptionGlow] = useState("auto");
   const [captionWords, setCaptionWords] = useState("auto");
+  const [captionOrientation, setCaptionOrientation] = useState<"horizontal" | "vertical">("horizontal");
   const [language, setLanguage] = useState("auto");
   const [hindiQuality, setHindiQuality] = useState<"fast" | "best">("fast");
 
@@ -1121,6 +1126,7 @@ export default function HomePage() {
         caption_animation: captionAnimation,
         caption_glow: captionGlow,
         caption_words: captionWords,
+        caption_orientation: captionOrientation,
         title_overlay: titleOverlay,
         hindi_quality: hindiQuality,
       });
@@ -1612,6 +1618,7 @@ export default function HomePage() {
                           overrideAnimation={captionAnimation}
                           overrideGlow={captionGlow}
                           overrideWords={captionWords}
+                          overrideOrientation={captionOrientation}
                           interactive
                         />
                         <div className="flex items-center justify-between px-3.5 py-2 rounded-xl border border-[#dae7ff] dark:border-[#2a2d33] bg-[#f5f8ff] dark:bg-[#111216]/90 text-[11px]">
@@ -1619,13 +1626,13 @@ export default function HomePage() {
                             {selectedSpec.label}
                           </span>
                           <span className="text-[#4d5b85] dark:text-[#9da4b0] truncate">
-                            {font || "Paired"} · {resolvedAnim} ·{" "}
-                            {WORD_MODES.find((w) => w.id === captionWords)?.label ?? "Auto"} · Glow: {captionGlow}
+                            {font || "Paired"} · {captionOrientation === "horizontal" ? "Horizontal" : "Vertical"} · {resolvedAnim} ·{" "}
+                            {WORD_MODES.find((w) => w.id === captionWords)?.label ?? "Auto"}
                           </span>
                         </div>
                       </div>
 
-                      {/* Right Motion, Words & Glow Pill Panel (Samsaam AnimationShowcase style) */}
+                      {/* Right Motion, Layout, Words & Glow Pill Panel */}
                       <div className="flex flex-col justify-between gap-4 p-5 rounded-2xl border border-[#dae7ff] dark:border-[#2a2d33] bg-[#f5f8ff] dark:bg-gradient-to-b dark:from-[#111216]/90 dark:to-[#0c0d10]/95 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
                         <div className="space-y-3">
                           <div className="text-sm font-semibold tracking-tight text-[#0c1836] dark:text-[#f1f4f9] text-center lg:text-left">
@@ -1643,6 +1650,31 @@ export default function HomePage() {
                                 {a.id === "auto" ? "Auto" : a.label.replace(/\s*\([^)]*\)/g, "")}
                               </button>
                             ))}
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 pt-3 border-t border-[#dae7ff] dark:border-[#2a2d33]">
+                          <div className="text-xs font-semibold text-[#4d5b85] dark:text-[#9da4b0]">
+                            Caption Layout
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {ORIENTATION_MODES.map((om) => {
+                              const active = captionOrientation === om.id;
+                              return (
+                                <button
+                                  key={om.id}
+                                  type="button"
+                                  onClick={() => setCaptionOrientation(om.id)}
+                                  className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-all cursor-pointer ${
+                                    active
+                                      ? "bg-[#3b86ff] text-white border-[#3b86ff] shadow-[0_0_16px_-4px_rgba(59,134,255,0.7)]"
+                                      : "bg-white dark:bg-[#1c1e22] text-[#4d5b85] dark:text-[#9da4b0] border-[#dae7ff] dark:border-[#2a2d33] hover:border-[#3b86ff]/50"
+                                  }`}
+                                >
+                                  {om.label}
+                                </button>
+                              );
+                            })}
                           </div>
                         </div>
 
@@ -1725,6 +1757,7 @@ export default function HomePage() {
                             overrideAnimation={captionAnimation}
                             overrideGlow={captionGlow}
                             overrideWords={captionWords}
+                            overrideOrientation={captionOrientation}
                           />
                         }
                       />
@@ -1752,6 +1785,7 @@ export default function HomePage() {
                             overrideAnimation={captionAnimation}
                             overrideGlow={captionGlow}
                             overrideWords={captionWords}
+                            overrideOrientation={captionOrientation}
                           />
                         }
                       />

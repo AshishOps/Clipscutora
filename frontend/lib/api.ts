@@ -12,6 +12,7 @@ export interface SubmitJobRequest {
   caption_animation?: string;
   caption_glow?: string;
   caption_words?: string;
+  caption_orientation?: "horizontal" | "vertical";
   title_overlay?: boolean;
   hindi_quality?: "fast" | "best";
 }

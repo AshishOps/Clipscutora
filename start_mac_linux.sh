@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Viral Clipper By MrBitBlox - start the app (macOS / Linux)
+# Clipscutora - start the app (macOS / Linux)
 cd "$(dirname "$0")"
 if [ ! -f .venv/bin/activate ]; then echo "Run setup first:  bash setup_mac_linux.sh"; exit 1; fi
 . .venv/bin/activate

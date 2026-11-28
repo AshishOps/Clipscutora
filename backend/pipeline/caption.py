@@ -340,6 +340,7 @@ VALID_ANIMATIONS = {
 }
 
 VALID_WORD_MODES = {"auto", "word", "short", "sentence"}
+VALID_ORIENTATIONS = {"horizontal", "vertical"}
 
 GLOW_MULTIPLIERS = {
     "auto": 1.0,
@@ -423,6 +424,7 @@ async def generate_captions(
     animation: Optional[str] = None,
     glow: Optional[str] = None,
     word_mode: Optional[str] = None,
+    orientation: Optional[str] = None,
 ) -> Path:
     """Write an ASS subtitle file with animated word captions and optional multi-layer glow."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -442,6 +444,10 @@ async def generate_captions(
     w_mode = (word_mode or "auto").lower()
     if w_mode not in VALID_WORD_MODES:
         w_mode = "auto"
+
+    orient = (orientation or "horizontal").lower()
+    if orient not in VALID_ORIENTATIONS:
+        orient = "horizontal"
 
     glow_mode = (glow or "auto").lower()
     glow_mult = GLOW_MULTIPLIERS.get(glow_mode, 1.0)
@@ -465,18 +471,18 @@ async def generate_captions(
                 )
     clean_words = _merge_continuation_words(raw_clip_words)
 
-    # 2. Geometry — 1px crisp hairline border on stroked presets (leave BorderStyle=3 box padding intact)
+    # 2. Geometry — stroke-free text for BorderStyle=1 (preserve BorderStyle=3 box padding)
     scale = config.CAPTION_SIZE_SCALE
     size = int(round(st["size"] * scale))
     if st.get("border_style", 1) == 1:
-        border = round(1.3 * scale, 1) if st.get("border", 0) > 0 else 0.0
-        shadow_depth = min(int(st.get("shadow", 2)), 2)
+        border = 0.0
+        shadow_depth = min(int(st.get("shadow", 1)), 1)
     else:
         border = st.get("border", 14)
         shadow_depth = st.get("shadow", 0)
     split = layout_type == "split_cam"
     cy = int(H * (config.CAPTION_Y_SPLIT if split else config.CAPTION_Y_DEFAULT))
-    avail_w = W - 120
+    avail_w = W - 100
     pop = st.get("pop", 100)
 
     def est_width(words: List[str], fs: int) -> float:
@@ -671,9 +677,9 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
     for b_idx, block in enumerate(blocks):
         texts = [fmt(w.word) for w in block]
-        if effective_mode == "two_line" and len(block) >= 2:
+        if orient == "vertical" and effective_mode == "two_line" and len(block) >= 2:
             wrap_mid = max(1, len(block) // 2)
-        elif effective_mode in ("highlight", "chunk", "karaoke") and len(block) >= 4 and est_width(texts, size) > avail_w:
+        elif orient == "vertical" and effective_mode in ("highlight", "chunk", "karaoke") and len(block) >= 4 and est_width(texts, size) > avail_w:
             wrap_mid = (len(block) + 1) // 2
         else:
             wrap_mid = 0
@@ -684,7 +690,8 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         )
         fs = size
         if line_w > avail_w:
-            fs = max(int(size * 0.55), int(size * avail_w / line_w))
+            min_fs = int(size * (0.44 if orient == "horizontal" else 0.55))
+            fs = max(min_fs, int(size * avail_w / line_w))
         line_tags = (f"\\fs{fs}" if fs != size else "") + base_blur
         reset = "{\\rDefault" + line_tags + "}"
         next_start = blocks[b_idx + 1][0].start if b_idx + 1 < len(blocks) else clip_dur
@@ -765,18 +772,23 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                         return dict(text=r_texts[j], tags=f"{fn}{col}{anim}", glow_hex=tok_glow)
 
                 rows_out: List[List[Dict[str, Any]]] = []
-                if row1_indices:
-                    rows_out.append([make_row_token(j, False) for j in row1_indices])
-                if row2_indices:
-                    rows_out.append([make_row_token(j, True) for j in row2_indices])
+                if orient == "horizontal":
+                    horiz_row = [make_row_token(j, False) for j in row1_indices] + [make_row_token(j, True) for j in row2_indices]
+                    if horiz_row:
+                        rows_out.append(horiz_row)
+                else:
+                    if row1_indices:
+                        rows_out.append([make_row_token(j, False) for j in row1_indices])
+                    if row2_indices:
+                        rows_out.append([make_row_token(j, True) for j in row2_indices])
                 emit_tokens(ev_s, ev_e, ent, rows_out, reset)
             continue
 
-        # Splash Hero composition (Business, Trading Bro, Aura Glow): big hero active word + small white supports
+        # Splash Hero composition (Business, Trading Bro, Aura Glow): hero active word + crisp white supports
         if effective_mode == "splash_hero":
             hero_font = st.get("hero_font", st["font"])
-            hero_fs = int(fs * st.get("hero_scale", 1.5))
-            support_fs = max(18, int(fs * 0.72))
+            hero_fs = int(fs * (1.28 if orient == "horizontal" else st.get("hero_scale", 1.5)))
+            support_fs = max(18, int(fs * (0.85 if orient == "horizontal" else 0.72)))
             for i, w in enumerate(block):
                 ev_s = block[0].start if i == 0 else w.start
                 ev_e = word_end(i)
@@ -810,7 +822,9 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                     glow_hex=use_hex if (glow_cfg and glow_mult > 0) else None,
                 )
 
-                if len(block) >= 4:
+                if orient == "horizontal":
+                    rows_out.append([hero_tok if j == i else make_support(j) for j in range(len(block))])
+                elif len(block) >= 4:
                     if i > 0:
                         rows_out.append([make_support(j) for j in range(0, i)])
                     rows_out.append([hero_tok])
